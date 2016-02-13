@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+
+        <item
+            android:id="@+id/nav_folders"
+            android:icon="@drawable/folder_multiple"
+            android:title="Folders" />
+
+        <item
+            android:id="@+id/nav_files"
+            android:icon="@drawable/file_multiple"
+            android:title="Files" />
+
+        <item
+            android:id="@+id/nav_notes"
+            android:icon="@drawable/file_document"
+            android:title="Notes" />
+
+        <item
+            android:id="@+id/nav_gallery"
+            android:icon="@drawable/ic_menu_gallery"
+            android:title="Images" />
+
+    </group>
+
+    <item android:title="Share PadLock">
+        <menu>
+            <!--<item-->
+                <!--android:id="@+id/nav_share"-->
+                <!--android:icon="@drawable/ic_menu_share"-->
+                <!--android:title="Share" />-->
+            <item
+                android:id="@+id/nav_rate"
+                android:icon="@drawable/google_play"
+                android:title="Review" />
+        </menu>
+    </item>
+
+</menu>
