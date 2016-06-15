@@ -1,0 +1,5 @@
+[FOLDER]|[FILE].[FILETYPE]
+
+Filetypes:
+.plimg
+.pltxt

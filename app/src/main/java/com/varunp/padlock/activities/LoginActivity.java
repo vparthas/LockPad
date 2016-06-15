@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
@@ -58,7 +59,10 @@ public class LoginActivity extends AppCompatActivity {
                         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
                     }
 
-                    checkPassword(m_passwordEntry.getText().toString());
+                    Snackbar.make(view, "Checking Password...", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+
+                    checkPassword(m_passwordEntry.getText().toString(), view);
                     return true;
                 }
                 return false;
@@ -66,7 +70,7 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    private void checkPassword(String s)
+    private void checkPassword(String s, View view)
     {
         boolean valid;
         try
@@ -84,6 +88,11 @@ public class LoginActivity extends AppCompatActivity {
             AES256Cipher.setKey(AES256Cipher.generateKey(s));
             startActivity(new Intent(this, MainActivity.class));
             finish();
+        }
+        else
+        {
+            Snackbar.make(view, "Checking Password...", Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show();
         }
     }
 
@@ -113,7 +122,7 @@ public class LoginActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_recovery_button:
-                Toast.makeText(this, "Recovery Screen", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Recovery Screen", Toast.LENGTH_SHORT).show(); //TODO:
                 break;
         }
         return true;
@@ -144,6 +153,7 @@ public class LoginActivity extends AppCompatActivity {
                 });
 
         AlertDialog dialog = builder.create();
+        dialog.setCancelable(false);
         dialog.show();
     }
 }

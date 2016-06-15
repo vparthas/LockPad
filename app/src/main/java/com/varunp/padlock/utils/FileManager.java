@@ -1,6 +1,7 @@
 package com.varunp.padlock.utils;
 
 import android.content.Context;
+import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -71,10 +72,27 @@ public class FileManager
         }
     }
 
+    public boolean delete(boolean internal, String name)
+    {
+        File file = internal ? new File(m_context.getFilesDir() + "/" + name) : new File(name);
+        return file.delete();
+    }
+
     public File[] getContents(boolean internal, String dir)
     {
         return internal ? new File(m_context.getFilesDir() + "/" + dir).listFiles() :
                 new File(dir).listFiles();
+    }
+
+    public String[] getContentsStr(boolean internal, String dir)
+    {
+        File[] files = getContents(internal, dir);
+        String[] ret = new String[files.length];
+
+        for(int i = 0; i < files.length; i++)
+            ret[i] = files[i].getName();
+
+        return ret;
     }
 
     public String getInternalPath(String dir)

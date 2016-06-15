@@ -1,5 +1,7 @@
 package com.varunp.padlock.utils;
 
+import net.dealforest.sample.crypt.AES256Cipher;
+
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
@@ -12,8 +14,7 @@ import javax.crypto.spec.PBEKeySpec;
 public class PasswordEncryptionService {
 
     public static boolean authenticate(String attemptedPassword, byte[] encryptedPassword, byte[] salt)
-            throws NoSuchAlgorithmException, InvalidKeySpecException
-    {
+            throws NoSuchAlgorithmException, InvalidKeySpecException {
         // Encrypt the clear-text password using the same salt that was used to
         // encrypt the original password
         byte[] encryptedAttemptedPassword = getEncryptedPassword(attemptedPassword, salt);
@@ -24,8 +25,7 @@ public class PasswordEncryptionService {
     }
 
     public static byte[] getEncryptedPassword(String password, byte[] salt)
-            throws NoSuchAlgorithmException, InvalidKeySpecException
-    {
+            throws NoSuchAlgorithmException, InvalidKeySpecException {
         // PBKDF2 with SHA-1 as the hashing algorithm. Note that the NIST
         // specifically names SHA-1 as an acceptable hashing algorithm for PBKDF2
         String algorithm = "PBKDF2WithHmacSHA1";
@@ -45,8 +45,7 @@ public class PasswordEncryptionService {
         return f.generateSecret(spec).getEncoded();
     }
 
-    public static byte[] generateSalt() throws NoSuchAlgorithmException
-    {
+    public static byte[] generateSalt() throws NoSuchAlgorithmException {
         // VERY important to use SecureRandom instead of just Random
         SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
 
@@ -55,5 +54,20 @@ public class PasswordEncryptionService {
         random.nextBytes(salt);
 
         return salt;
+    }
+
+    public static String encrypt(String src, String pwd)
+    {
+        return AES256Cipher.encrypt(src, AES256Cipher.generateKey(pwd));
+    }
+
+    public static String decrypt(String enc, String pwd)
+    {
+        return AES256Cipher.decrypt(enc, AES256Cipher.generateKey(pwd));
+    }
+
+    public static String decrypt(String enc, byte[] key)
+    {
+        return AES256Cipher.decrypt(enc, key);
     }
 }

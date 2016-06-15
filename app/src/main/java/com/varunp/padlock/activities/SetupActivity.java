@@ -14,15 +14,21 @@ import android.widget.TextView;
 
 import com.varunp.padlock.R;
 import com.varunp.padlock.utils.FileManager;
+import com.varunp.padlock.utils.FileTracker;
+import com.varunp.padlock.utils.FolderList;
 import com.varunp.padlock.utils.Globals;
 import com.varunp.padlock.utils.JsonWrapper;
 import com.varunp.padlock.utils.PasswordEncryptionService;
 
 import net.dealforest.sample.crypt.AES256Cipher;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 public class SetupActivity extends AppCompatActivity implements TextWatcher {
 
@@ -168,10 +174,20 @@ public class SetupActivity extends AppCompatActivity implements TextWatcher {
     private boolean makeTutorialFiles(View view)
     {
         FileManager fm = new FileManager(this);
-        if(!fm.createFolder(fm.getInternalPath(Globals.FOLDER_DATA + "/" + Globals.FOLDER_TUTORIAL)))
+//        if(!fm.createFolder(fm.getInternalPath(Globals.FOLDER_DATA + "/" + Globals.FOLDER_TUTORIAL)))
+//            return false;
+
+        String tutText = PasswordEncryptionService.encrypt(Globals.TUTORIAL_TEXT_PLACEHOLDR,
+                                                            password1.getText().toString());
+        String tutFileName = Globals.FOLDER_TUTORIAL + Globals.FILE_DELIM + Globals.FOLDER_TUTORIAL + Globals.FILENAME_TEXT;
+
+        if(!fm.saveFile(true, Globals.FOLDER_DATA + "/" + tutFileName, tutText))
             return false;
-        if(!fm.saveFile(true, "tutorial", "HOLA SENOR FUCKTARD"))
-            return false;
+
+        Set<String> folders = new HashSet<>();
+        folders.add(Globals.FOLDER_TUTORIAL);
+        FolderList.commit(getApplicationContext(), folders);
+        FileTracker.init(getApplicationContext(), fm.getContentsStr(true, Globals.FOLDER_DATA));
 
         return true;
     }

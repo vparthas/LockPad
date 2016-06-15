@@ -8,14 +8,17 @@ public class Globals
     //Filenames
     public static final String FILENAME_LOGIN_INFO = "login_info.json";
     public static final String FILENAME_RECOVERY_INFO = "recovery_info.json";
+    public static final String FILENAME_FOLDER_LIST = "folder_reg.json";
 
     //folder names
     public static final String FOLDER_DATA = "data";
     public static final String FOLDER_TUTORIAL = "Tutorial";
     public static final String FOLDER_PARENT = "..";
+    public static final String FILE_DELIM = "|";
 
     //file suffixes
-    public static final String IMAGE_SUFFIX = ".pl_img";
+    public static final String FILENAME_IMAGE = ".plimg";
+    public static final String FILENAME_TEXT = ".pltxt";
 
     //bundle keys
     public static final String BUNDLE_KEY_PATH = "folder_path";
@@ -34,4 +37,6 @@ public class Globals
     public static final String NAV_HEADER_FILES = "Files";
     public static final String NAV_HEADER_NOTES = "Notes";
     public static final String NAV_HEADER_IMAGES = "Images";
+
+    public static String TUTORIAL_TEXT_PLACEHOLDR = "TODO...";
 }

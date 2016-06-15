@@ -23,6 +23,8 @@ import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.varunp.padlock.R;
 import com.varunp.padlock.adapters.FolderAdapter;
 import com.varunp.padlock.utils.FileManager;
+import com.varunp.padlock.utils.FileTracker;
+import com.varunp.padlock.utils.FolderList;
 import com.varunp.padlock.utils.Globals;
 
 import net.dealforest.sample.crypt.AES256Cipher;
@@ -46,6 +48,8 @@ public class MainActivity extends AppCompatActivity
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.hide();
 
+        initFileTracker();
+
         initFab();
 
         initRecyclerView();
@@ -53,7 +57,15 @@ public class MainActivity extends AppCompatActivity
         initDrawer();
     }
 
-    private void initRecyclerView() {
+    private void initFileTracker()
+    {
+        FileManager fm = new FileManager(getApplicationContext());
+        String[] files = fm.getContentsStr(FileManager.FILE_INTERNAL, Globals.FOLDER_DATA);
+        FileTracker.init(getApplicationContext(), files);
+    }
+
+    private void initRecyclerView()
+    {
         mRecyclerView = (RecyclerView) findViewById(R.id.cardList);
 
         // use this setting to improve performance if you know that changes
@@ -65,8 +77,12 @@ public class MainActivity extends AppCompatActivity
         mRecyclerView.setLayoutManager(mLayoutManager);
 
         // specify an adapter (see also next example)
-        mAdapter = new FolderAdapter(
-                new FileManager(this).getInternalPath(Globals.FOLDER_DATA) + "/");
+        resetRecycler(FolderAdapter.QUERY_FOLDERS);
+    }
+
+    private void resetRecycler(int query)
+    {
+        mAdapter = new FolderAdapter(query);
         mRecyclerView.setAdapter(mAdapter);
     }
 
@@ -179,21 +195,29 @@ public class MainActivity extends AppCompatActivity
         {
             toolbar.setTitle(Globals.NAV_HEADER_NOTES);
             setTitle(Globals.NAV_HEADER_NOTES);
+
+            resetRecycler(FolderAdapter.QUERY_TEXT);
         }
         else if (id == R.id.nav_gallery)
         {
             toolbar.setTitle(Globals.NAV_HEADER_IMAGES);
             setTitle(Globals.NAV_HEADER_IMAGES);
+
+            resetRecycler(FolderAdapter.QUERY_IMAGE);
         }
         else if (id == R.id.nav_files)
         {
             toolbar.setTitle(Globals.NAV_HEADER_FILES);
             setTitle(Globals.NAV_HEADER_FILES);
+
+            resetRecycler(FolderAdapter.QUERY_FILES);
         }
         else if (id == R.id.nav_folders)
         {
             toolbar.setTitle(Globals.NAV_HEADER_FOLDERS);
             setTitle(Globals.NAV_HEADER_FOLDERS);
+
+            resetRecycler(FolderAdapter.QUERY_FOLDERS);
         }
         else if (id == R.id.nav_rate)
         {
