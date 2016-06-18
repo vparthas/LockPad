@@ -128,16 +128,23 @@ public class FileTracker
         new FileManager(context).delete(FileManager.FILE_INTERNAL, Globals.FOLDER_DATA + "/" + file.getRawNamw());
     }
 
-    public static void addFolder(Context context, String name)
+    public static boolean addFolder(Context context, String name)
     {
+        if(name.contains(Globals.FILE_DELIM))
+        {
+            Toast.makeText(context, "Folder name cannot contain '|'.", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
         if(files.containsKey(name))
         {
-            Toast.makeText(context, "Folder already exsists.", Toast.LENGTH_SHORT);
-            return;
+            Toast.makeText(context, "Folder already exsists.", Toast.LENGTH_SHORT).show();
+            return false;
         }
 
         files.put(name, new HashSet<PLFile>());
         FolderList.commit(context, files.keySet());
+        return true;
     }
 
     public static void removeFolder(Context context, String name)

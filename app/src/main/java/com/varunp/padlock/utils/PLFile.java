@@ -41,6 +41,6 @@ public class PLFile
 
     public String getRawNamw()
     {
-        return folderName + Globals.FILE_DELIM + fileName + suffix;
+        return isFolder() ? fileName : folderName + Globals.FILE_DELIM + fileName + suffix;
     }
 }

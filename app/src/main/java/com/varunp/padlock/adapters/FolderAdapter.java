@@ -1,7 +1,9 @@
 package com.varunp.padlock.adapters;
 
+import android.location.GpsStatus;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
+import android.telephony.gsm.GsmCellLocation;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,18 +23,10 @@ import java.util.Stack;
 
 public class FolderAdapter extends RecyclerView.Adapter<FolderAdapter.ViewHolder>
 {
-    public class Manager
-    {
-        private Stack<PLFile> parents;
-
-        public List<PLFile> getParent()
-        {
-            return null; //TODO
-        }
-    }
-
+    private boolean hasParent;
 
     private List<PLFile> mDataset;
+    private FolderAdapterListener listener;
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -57,27 +51,58 @@ public class FolderAdapter extends RecyclerView.Adapter<FolderAdapter.ViewHolder
     public static final int QUERY_FOLDERS = 0, QUERY_FILES = 1, QUERY_TEXT = 2, QUERY_IMAGE = 3;
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public FolderAdapter(int query)
+    public FolderAdapter(int query, FolderAdapterListener listener)
     {
+        hasParent = false;
+        this.listener = listener;
+
         switch(query)
         {
             case QUERY_FOLDERS:
                 mDataset = FileTracker.getFolders();
+                listener.onQueryChanged(Globals.NAV_HEADER_FOLDERS, getItemCount());
                 break;
             case QUERY_FILES:
                 mDataset = FileTracker.getAllFiles();
+                listener.onQueryChanged(Globals.NAV_HEADER_FILES, getItemCount());
                 break;
             case QUERY_TEXT:
                 mDataset = FileTracker.getFileType(Globals.FILENAME_TEXT);
+                listener.onQueryChanged(Globals.NAV_HEADER_NOTES, getItemCount());
                 break;
             case QUERY_IMAGE:
                 mDataset = FileTracker.getFileType(Globals.FILENAME_IMAGE);
+                listener.onQueryChanged(Globals.NAV_HEADER_IMAGES, getItemCount());
                 break;
         }
 
         Log.d("FolderAdapter", mDataset.toString());
     }
 
+    public boolean hasParent()
+    {
+        return hasParent;
+    }
+
+    public void up()
+    {
+        mDataset = FileTracker.getFolders();
+        notifyDataSetChanged();
+
+        listener.onQueryChanged(Globals.NAV_HEADER_FOLDERS, getItemCount());
+
+        hasParent = false;
+    }
+
+    private void down(PLFile folder)
+    {
+        mDataset = FileTracker.getFolder(folder);
+        notifyDataSetChanged();
+
+        listener.onQueryChanged(folder.getFileName(), getItemCount());
+
+        hasParent = true;
+    }
 
     // Create new views (invoked by the layout manager)
     @Override
@@ -105,6 +130,11 @@ public class FolderAdapter extends RecyclerView.Adapter<FolderAdapter.ViewHolder
             @Override
             public void onClick(View v)
             {
+                if(mDataset.get(position).isFolder())
+                {
+                    down(mDataset.get(position));
+                }
+
                 //TODO
             }
         });
@@ -129,7 +159,7 @@ public class FolderAdapter extends RecyclerView.Adapter<FolderAdapter.ViewHolder
     private String getSubLine(PLFile plFile)
     {
         if(plFile.isFolder())
-            return FileTracker.getFolder(plFile).size() + " items...";
+            return FileTracker.getFolder(plFile).size() + " item(s)";
         if(plFile.getSuffix().equals(Globals.FILENAME_IMAGE))
             return "Image";
         if(plFile.getSuffix().equals(Globals.FILENAME_TEXT))

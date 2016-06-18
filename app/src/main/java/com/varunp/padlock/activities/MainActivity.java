@@ -1,14 +1,21 @@
 package com.varunp.padlock.activities;
 
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
+import android.support.v4.widget.TextViewCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -18,10 +25,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.varunp.padlock.R;
 import com.varunp.padlock.adapters.FolderAdapter;
+import com.varunp.padlock.adapters.FolderAdapterListener;
 import com.varunp.padlock.utils.FileManager;
 import com.varunp.padlock.utils.FileTracker;
 import com.varunp.padlock.utils.FolderList;
@@ -30,13 +42,15 @@ import com.varunp.padlock.utils.Globals;
 import net.dealforest.sample.crypt.AES256Cipher;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, FolderAdapterListener {
 
     private Toolbar toolbar;
 
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
+
+    private TextView noItems;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +62,8 @@ public class MainActivity extends AppCompatActivity
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.hide();
 
+        initViews();
+
         initFileTracker();
 
         initFab();
@@ -55,6 +71,11 @@ public class MainActivity extends AppCompatActivity
         initRecyclerView();
 
         initDrawer();
+    }
+
+    private void initViews()
+    {
+        noItems = (TextView)findViewById(R.id.nothing_view);
     }
 
     private void initFileTracker()
@@ -82,7 +103,7 @@ public class MainActivity extends AppCompatActivity
 
     private void resetRecycler(int query)
     {
-        mAdapter = new FolderAdapter(query);
+        mAdapter = new FolderAdapter(query, this);
         mRecyclerView.setAdapter(mAdapter);
     }
 
@@ -103,7 +124,7 @@ public class MainActivity extends AppCompatActivity
 
     private void initFab()
     {
-        FloatingActionsMenu floatingActionsMenu = (FloatingActionsMenu) findViewById(R.id.right_labels);
+        final FloatingActionsMenu floatingActionsMenu = (FloatingActionsMenu) findViewById(R.id.right_labels);
 
         com.getbase.floatingactionbutton.FloatingActionButton addNote =
                 (com.getbase.floatingactionbutton.FloatingActionButton)findViewById(R.id.addNote);
@@ -127,19 +148,80 @@ public class MainActivity extends AppCompatActivity
                 (com.getbase.floatingactionbutton.FloatingActionButton)findViewById(R.id.addFolder);
         addFolder.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                //TODO: do this shit
+            public void onClick(View v)
+            {
+                floatingActionsMenu.collapse();
+                openNewFolderDialog();
             }
         });
+    }
+
+    private void openNewFolderDialog()
+    {
+        final Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.dialog_new_folder);
+        //dialog.setTitle("Create new folder");
+        dialog.setCancelable(true);
+
+        final EditText editText_folder_name = (EditText)dialog.findViewById(R.id.dialog_new_folder_name);
+
+        Button button_ok = (Button)dialog.findViewById(R.id.dialog_new_folder_ok);
+        button_ok.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                String folderName = editText_folder_name.getText().toString();
+                if(!FileTracker.addFolder(getApplicationContext(), folderName))
+                    return;
+
+                resetRecycler(FolderAdapter.QUERY_FOLDERS);
+                dialog.dismiss();
+            }
+        });
+
+        Button button_cancel = (Button)dialog.findViewById(R.id.dialog_new_folder_cancel);
+        button_cancel.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                dialog.dismiss();
+            }
+        });
+
+        dialog.show();
     }
 
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
+        if (drawer.isDrawerOpen(GravityCompat.START))
+        {
             drawer.closeDrawer(GravityCompat.START);
-        } else {
+        }
+
+        FolderAdapter adapter = (FolderAdapter)mRecyclerView.getAdapter();
+        if(adapter.hasParent())
+        {
+            adapter.up();
+        }
+        else
+        {
+            backTwice();
+        }
+    }
+
+    long previous_click = 0;
+    private void backTwice()
+    {
+        long temp = System.currentTimeMillis();
+        if(temp - previous_click < 1000)
             super.onBackPressed();
+        else
+        {
+            previous_click = temp;
+            Snackbar.make(mRecyclerView, "Press back once more to exit.", Snackbar.LENGTH_SHORT).show();
         }
     }
 
@@ -179,7 +261,7 @@ public class MainActivity extends AppCompatActivity
 
         if(id == R.id.action_slideshow)
         {
-
+            //TODO
         }
 
         return super.onOptionsItemSelected(item);
@@ -193,29 +275,29 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.nav_notes)
         {
-            toolbar.setTitle(Globals.NAV_HEADER_NOTES);
-            setTitle(Globals.NAV_HEADER_NOTES);
+//            toolbar.setTitle(Globals.NAV_HEADER_NOTES);
+//            setTitle(Globals.NAV_HEADER_NOTES);
 
             resetRecycler(FolderAdapter.QUERY_TEXT);
         }
         else if (id == R.id.nav_gallery)
         {
-            toolbar.setTitle(Globals.NAV_HEADER_IMAGES);
-            setTitle(Globals.NAV_HEADER_IMAGES);
+//            toolbar.setTitle(Globals.NAV_HEADER_IMAGES);
+//            setTitle(Globals.NAV_HEADER_IMAGES);
 
             resetRecycler(FolderAdapter.QUERY_IMAGE);
         }
         else if (id == R.id.nav_files)
         {
-            toolbar.setTitle(Globals.NAV_HEADER_FILES);
-            setTitle(Globals.NAV_HEADER_FILES);
+//            toolbar.setTitle(Globals.NAV_HEADER_FILES);
+//            setTitle(Globals.NAV_HEADER_FILES);
 
             resetRecycler(FolderAdapter.QUERY_FILES);
         }
         else if (id == R.id.nav_folders)
         {
-            toolbar.setTitle(Globals.NAV_HEADER_FOLDERS);
-            setTitle(Globals.NAV_HEADER_FOLDERS);
+//            toolbar.setTitle(Globals.NAV_HEADER_FOLDERS);
+//            setTitle(Globals.NAV_HEADER_FOLDERS);
 
             resetRecycler(FolderAdapter.QUERY_FOLDERS);
         }
@@ -233,5 +315,13 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    public void onQueryChanged(String query, int itemCount)
+    {
+        noItems.setVisibility(itemCount == 0 ? View.VISIBLE : View.INVISIBLE);
+
+        toolbar.setTitle(query);
+        setTitle(query);
     }
 }

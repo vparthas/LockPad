@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,6 +33,7 @@ public class LoginActivity extends AppCompatActivity {
     byte[][] m_passwordData;
 
     EditText m_passwordEntry;
+    RelativeLayout page_layout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -45,6 +47,8 @@ public class LoginActivity extends AppCompatActivity {
 
     private void initViews()
     {
+        page_layout = (RelativeLayout)findViewById(R.id.login_rl);
+
         m_passwordEntry = (EditText)findViewById(R.id.login_entry);
         m_passwordEntry.setOnEditorActionListener(new EditText.OnEditorActionListener()
         {
@@ -59,8 +63,7 @@ public class LoginActivity extends AppCompatActivity {
                         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
                     }
 
-                    Snackbar.make(view, "Checking Password...", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
+                    Toast.makeText(getApplicationContext(), "Checking password...", Toast.LENGTH_SHORT).show();
 
                     checkPassword(m_passwordEntry.getText().toString(), view);
                     return true;
@@ -91,8 +94,8 @@ public class LoginActivity extends AppCompatActivity {
         }
         else
         {
-            Snackbar.make(view, "Checking Password...", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show();
+            Snackbar.make(view, "Incorrect password...", Snackbar.LENGTH_LONG)
+                .setAction("Action", null).show();
         }
     }
 
