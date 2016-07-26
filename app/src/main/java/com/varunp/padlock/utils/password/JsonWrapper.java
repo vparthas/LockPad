@@ -1,6 +1,9 @@
-package com.varunp.padlock.utils;
+package com.varunp.padlock.utils.password;
 
 import android.util.Base64;
+import android.util.Log;
+
+import com.varunp.padlock.utils.Globals;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -10,6 +13,7 @@ import org.json.JSONObject;
  */
 public class JsonWrapper
 {
+    public static final int LOGIN_DATA_PASSWORD = 0, LOGIN_DATA_SALT = 1;
     public static byte[][] readLoginData(String contents)
     {
         try
@@ -65,6 +69,43 @@ public class JsonWrapper
         }
         catch (Exception e)
         {
+            return null;
+        }
+    }
+
+    public static final class RecoveryData
+    {
+        public byte[] hash, salt;
+        public String question, password;
+
+        public RecoveryData(byte[] hash, byte[] salt, String question, String password)
+        {
+            this.hash = hash;
+            this.salt = salt;
+            this.question = question;
+            this.password = password;
+        }
+    }
+
+    public static RecoveryData readRecoveryData(String rawJSON)
+    {
+        try
+        {
+            JSONObject data = new JSONObject(rawJSON);
+
+            byte[] hash = Base64.decode(
+                    data.getString(Globals.JSON_RECOVERY_ANSWER_HASH_OBJECT), Base64.DEFAULT);
+            byte[] salt = Base64.decode(
+                    data.getString(Globals.JSON_RECOVERY_ANSWER_SALT_OBJECT), Base64.DEFAULT);
+
+            String question = data.getString(Globals.JSON_RECOVERY_QUESTION_OBJECT);
+            String password = data.getString(Globals.JSON_RECOVERY_PASSWORD_OBJECT);
+
+            return new RecoveryData(hash, salt, question, password);
+        }
+        catch (Exception e)
+        {
+            Log.d("JsonWrapper", e.getMessage());
             return null;
         }
     }

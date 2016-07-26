@@ -1,4 +1,6 @@
-package com.varunp.padlock.utils;
+package com.varunp.padlock.utils.file;
+
+import com.varunp.padlock.utils.Globals;
 
 public class PLFile
 {
@@ -39,8 +41,13 @@ public class PLFile
         return folderName == null && suffix == null;
     }
 
-    public String getRawNamw()
+    public String getRawName()
     {
         return isFolder() ? fileName : folderName + Globals.FILE_DELIM + fileName + suffix;
+    }
+
+    public static String generateFileName(String folder, String file, String suffix)
+    {
+        return folder + Globals.FILE_DELIM + file + suffix;
     }
 }

@@ -1,14 +1,13 @@
-package com.varunp.padlock.utils;
+package com.varunp.padlock.utils.file;
 
 import android.content.Context;
 import android.util.Log;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
+import com.varunp.padlock.utils.Globals;
 
-import java.util.ArrayList;
+import org.json.JSONArray;
+
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 /**

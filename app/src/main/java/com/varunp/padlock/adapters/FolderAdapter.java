@@ -1,25 +1,19 @@
 package com.varunp.padlock.adapters;
 
-import android.location.GpsStatus;
-import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
-import android.telephony.gsm.GsmCellLocation;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.varunp.padlock.R;
-import com.varunp.padlock.utils.FileTracker;
+import com.varunp.padlock.utils.file.FileTracker;
 import com.varunp.padlock.utils.Globals;
-import com.varunp.padlock.utils.PLFile;
+import com.varunp.padlock.utils.file.PLFile;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Stack;
 
 public class FolderAdapter extends RecyclerView.Adapter<FolderAdapter.ViewHolder>
 {
@@ -27,6 +21,9 @@ public class FolderAdapter extends RecyclerView.Adapter<FolderAdapter.ViewHolder
 
     private List<PLFile> mDataset;
     private FolderAdapterListener listener;
+    private String mQuery;
+
+    private String focused;
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -51,32 +48,18 @@ public class FolderAdapter extends RecyclerView.Adapter<FolderAdapter.ViewHolder
     public static final int QUERY_FOLDERS = 0, QUERY_FILES = 1, QUERY_TEXT = 2, QUERY_IMAGE = 3;
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public FolderAdapter(int query, FolderAdapterListener listener)
+//    public FolderAdapter(int query, FolderAdapterListener listener)
+//    {
+//        hasParent = false;
+//        this.listener = listener;
+//        refresh(query + "");
+//    }
+
+    public FolderAdapter(String query, FolderAdapterListener listener)
     {
         hasParent = false;
         this.listener = listener;
-
-        switch(query)
-        {
-            case QUERY_FOLDERS:
-                mDataset = FileTracker.getFolders();
-                listener.onQueryChanged(Globals.NAV_HEADER_FOLDERS, getItemCount());
-                break;
-            case QUERY_FILES:
-                mDataset = FileTracker.getAllFiles();
-                listener.onQueryChanged(Globals.NAV_HEADER_FILES, getItemCount());
-                break;
-            case QUERY_TEXT:
-                mDataset = FileTracker.getFileType(Globals.FILENAME_TEXT);
-                listener.onQueryChanged(Globals.NAV_HEADER_NOTES, getItemCount());
-                break;
-            case QUERY_IMAGE:
-                mDataset = FileTracker.getFileType(Globals.FILENAME_IMAGE);
-                listener.onQueryChanged(Globals.NAV_HEADER_IMAGES, getItemCount());
-                break;
-        }
-
-        Log.d("FolderAdapter", mDataset.toString());
+        refresh(query);
     }
 
     public boolean hasParent()
@@ -86,21 +69,13 @@ public class FolderAdapter extends RecyclerView.Adapter<FolderAdapter.ViewHolder
 
     public void up()
     {
-        mDataset = FileTracker.getFolders();
-        notifyDataSetChanged();
-
-        listener.onQueryChanged(Globals.NAV_HEADER_FOLDERS, getItemCount());
-
+        refresh(QUERY_FOLDERS + "");
         hasParent = false;
     }
 
     private void down(PLFile folder)
     {
-        mDataset = FileTracker.getFolder(folder);
-        notifyDataSetChanged();
-
-        listener.onQueryChanged(folder.getFileName(), getItemCount());
-
+        refresh(folder.getFileName());
         hasParent = true;
     }
 
@@ -125,6 +100,9 @@ public class FolderAdapter extends RecyclerView.Adapter<FolderAdapter.ViewHolder
         holder.itemView.setText(getSubLine(mDataset.get(position)));
         holder.iconView.setImageResource(getImage(mDataset.get(position)));
 
+        if(position == 1)
+            holder.mView.setClickable(true);
+
         holder.mView.setOnClickListener(new View.OnClickListener()
         {
             @Override
@@ -134,12 +112,63 @@ public class FolderAdapter extends RecyclerView.Adapter<FolderAdapter.ViewHolder
                 {
                     down(mDataset.get(position));
                 }
+                else
+                    listener.open(mDataset.get(position));
+            }
+        });
 
-                //TODO
+        holder.mView.setOnLongClickListener(new View.OnLongClickListener()
+        {
+            @Override
+            public boolean onLongClick(View v)
+            {
+                Toast.makeText(v.getContext(), "Long pressed", Toast.LENGTH_SHORT).show();
+                return true;
             }
         });
     }
 
+    private void refresh(String query)
+    {
+        mQuery = query;
+        refresh();
+    }
+
+    private void refresh()
+    {
+        try
+        {
+            int q = Integer.parseInt(mQuery);
+            switch(q)
+            {
+                case QUERY_FOLDERS:
+                    mDataset = FileTracker.getFolders();
+                    listener.onQueryChanged(Globals.NAV_HEADER_FOLDERS, getItemCount());
+                    break;
+                case QUERY_FILES:
+                    mDataset = FileTracker.getAllFiles();
+                    listener.onQueryChanged(Globals.NAV_HEADER_FILES, getItemCount());
+                    break;
+                case QUERY_TEXT:
+                    mDataset = FileTracker.getFileType(Globals.FILENAME_TEXT);
+                    listener.onQueryChanged(Globals.NAV_HEADER_NOTES, getItemCount());
+                    break;
+                case QUERY_IMAGE:
+                    mDataset = FileTracker.getFileType(Globals.FILENAME_IMAGE);
+                    listener.onQueryChanged(Globals.NAV_HEADER_IMAGES, getItemCount());
+                    break;
+            }
+            focused = null;
+        }
+        catch (NumberFormatException e)
+        {
+            focused = mQuery;
+            mDataset = FileTracker.getFolder(new PLFile(mQuery));
+            listener.onQueryChanged(mQuery, getItemCount());
+        }
+
+        notifyDataSetChanged();
+    }
 
     public static final int FOLDER = R.drawable.folder;
     public static final int NOTE = R.drawable.file_document;
@@ -159,13 +188,21 @@ public class FolderAdapter extends RecyclerView.Adapter<FolderAdapter.ViewHolder
     private String getSubLine(PLFile plFile)
     {
         if(plFile.isFolder())
-            return FileTracker.getFolder(plFile).size() + " item(s)";
+        {
+            int temp = FileTracker.getFolder(plFile).size();
+            return temp == 1 ? temp + " item" : temp + " items";
+        }
         if(plFile.getSuffix().equals(Globals.FILENAME_IMAGE))
             return "Image";
         if(plFile.getSuffix().equals(Globals.FILENAME_TEXT))
             return "Text";
         else
             return "Error!";
+    }
+
+    public String getFocused()
+    {
+        return focused == null ? "New Folder" : focused;
     }
 
     // Return the size of your dataset (invoked by the layout manager)

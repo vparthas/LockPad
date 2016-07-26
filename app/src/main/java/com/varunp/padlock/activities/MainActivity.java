@@ -1,21 +1,14 @@
 package com.varunp.padlock.activities;
 
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.PorterDuff;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v4.widget.TextViewCompat;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -34,15 +27,17 @@ import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.varunp.padlock.R;
 import com.varunp.padlock.adapters.FolderAdapter;
 import com.varunp.padlock.adapters.FolderAdapterListener;
-import com.varunp.padlock.utils.FileManager;
-import com.varunp.padlock.utils.FileTracker;
-import com.varunp.padlock.utils.FolderList;
+import com.varunp.padlock.utils.file.FileManager;
+import com.varunp.padlock.utils.file.FileTracker;
 import com.varunp.padlock.utils.Globals;
+import com.varunp.padlock.utils.file.PLFile;
 
 import net.dealforest.sample.crypt.AES256Cipher;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, FolderAdapterListener {
+
+    public static String INTENT_FOLDER = "FOLDER";
 
     private Toolbar toolbar;
 
@@ -58,6 +53,9 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        byte[] key = getIntent().getByteArrayExtra(DocumentActivity.INTENT_KEY_ENCRYPTION_KEY);
+        AES256Cipher.setKey(key == null ? AES256Cipher.getKey() : key);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.hide();
@@ -97,11 +95,19 @@ public class MainActivity extends AppCompatActivity
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
-        // specify an adapter (see also next example)
-        resetRecycler(FolderAdapter.QUERY_FOLDERS);
+        String folder = this.getIntent().getStringExtra(INTENT_FOLDER);
+        if(folder != null)
+            resetRecycler(folder);
+        else
+            resetRecycler(FolderAdapter.QUERY_FOLDERS);
     }
 
     private void resetRecycler(int query)
+    {
+        resetRecycler(query + "");
+    }
+
+    private void resetRecycler(String query)
     {
         mAdapter = new FolderAdapter(query, this);
         mRecyclerView.setAdapter(mAdapter);
@@ -118,8 +124,8 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.setCheckedItem(R.id.nav_folders);
-        toolbar.setTitle(Globals.NAV_HEADER_FOLDERS);
-        setTitle(Globals.NAV_HEADER_FOLDERS);
+//        toolbar.setTitle(Globals.NAV_HEADER_FOLDERS);
+//        setTitle(Globals.NAV_HEADER_FOLDERS);
     }
 
     private void initFab()
@@ -130,8 +136,13 @@ public class MainActivity extends AppCompatActivity
                 (com.getbase.floatingactionbutton.FloatingActionButton)findViewById(R.id.addNote);
         addNote.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                //TODO: do this shit
+            public void onClick(View v)
+            {
+                Intent newDocIntent = new Intent(getApplicationContext(), DocumentActivity.class);
+                newDocIntent.putExtra(DocumentActivity.INTENT_KEY_IS_NEW_DOC, true);
+                newDocIntent.putExtra(DocumentActivity.INTENT_KEY_FOLDER_NAME, ((FolderAdapter)mAdapter).getFocused());
+                newDocIntent.putExtra(DocumentActivity.INTENT_KEY_ENCRYPTION_KEY, AES256Cipher.getKey());
+                startActivity(newDocIntent);
             }
         });
 
@@ -212,11 +223,11 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    long previous_click = 0;
+    private long previous_click = 0;
     private void backTwice()
     {
         long temp = System.currentTimeMillis();
-        if(temp - previous_click < 1000)
+        if(temp - previous_click < 2000)
             super.onBackPressed();
         else
         {
@@ -238,10 +249,10 @@ public class MainActivity extends AppCompatActivity
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
 
-        MenuItem slideshow = menu.findItem(R.id.action_slideshow);
-        Drawable newIcon = (Drawable)slideshow.getIcon();
-        newIcon.mutate().setColorFilter(Color.argb(255, 255, 255, 255), PorterDuff.Mode.SRC_IN);
-        slideshow.setIcon(newIcon);
+//        MenuItem slideshow = menu.findItem(R.id.action_slideshow);
+//        Drawable newIcon = (Drawable)slideshow.getIcon();
+//        newIcon.mutate().setColorFilter(Color.argb(255, 255, 255, 255), PorterDuff.Mode.SRC_IN);
+//        slideshow.setIcon(newIcon);
 
         return true;
     }
@@ -259,10 +270,9 @@ public class MainActivity extends AppCompatActivity
             return true;
         }
 
-        if(id == R.id.action_slideshow)
-        {
-            //TODO
-        }
+//        if(id == R.id.action_slideshow)
+//        {
+//        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -324,4 +334,24 @@ public class MainActivity extends AppCompatActivity
         toolbar.setTitle(query);
         setTitle(query);
     }
+
+    public void open(PLFile file)
+    {
+        if(file.getSuffix().equals(Globals.FILENAME_TEXT))
+        {
+            Intent docIntent = new Intent(getApplicationContext(), DocumentActivity.class);
+            docIntent.putExtra(DocumentActivity.INTENT_KEY_IS_NEW_DOC, false);
+            docIntent.putExtra(DocumentActivity.INTENT_KEY_FOLDER_NAME, file.getFolderName());
+            docIntent.putExtra(DocumentActivity.INTENT_KEY_FILE_NAME, file.getFileName());
+            docIntent.putExtra(DocumentActivity.INTENT_KEY_ENCRYPTION_KEY, AES256Cipher.getKey());
+            startActivity(docIntent);
+        }
+        else if(file.getSuffix().equals(Globals.FILENAME_IMAGE))
+        {
+            //TODO
+        }
+        else
+            Log.d("MainActivity", "ERROR: Unrecognized file type: " + file.getRawName());
+    }
+
 }

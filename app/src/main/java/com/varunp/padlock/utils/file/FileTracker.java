@@ -1,9 +1,11 @@
-package com.varunp.padlock.utils;
+package com.varunp.padlock.utils.file;
 
 import android.content.Context;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.Toast;
+
+import com.varunp.padlock.utils.Globals;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -125,14 +127,26 @@ public class FileTracker
         getQuery(file.getFolderName()).remove(file);
         getQuery(file.getSuffix()).remove(file);
 
-        new FileManager(context).delete(FileManager.FILE_INTERNAL, Globals.FOLDER_DATA + "/" + file.getRawNamw());
+        new FileManager(context).delete(FileManager.FILE_INTERNAL, Globals.FOLDER_DATA + "/" + file.getRawName());
     }
 
     public static boolean addFolder(Context context, String name)
     {
+        if(name.length() == 0)
+        {
+            Toast.makeText(context, "Folder name cannot be blank.", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
         if(name.contains(Globals.FILE_DELIM))
         {
             Toast.makeText(context, "Folder name cannot contain '|'.", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        if(name.matches("[0-9]+"))
+        {
+            Toast.makeText(context, "Folder name cannot contain only numeric digits.", Toast.LENGTH_SHORT).show(); //TODO: fix bug that requires this.
             return false;
         }
 

@@ -13,20 +13,17 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.varunp.padlock.R;
-import com.varunp.padlock.utils.FileManager;
-import com.varunp.padlock.utils.FileTracker;
-import com.varunp.padlock.utils.FolderList;
+import com.varunp.padlock.utils.file.FileManager;
+import com.varunp.padlock.utils.file.FileTracker;
+import com.varunp.padlock.utils.file.FolderList;
 import com.varunp.padlock.utils.Globals;
-import com.varunp.padlock.utils.JsonWrapper;
-import com.varunp.padlock.utils.PasswordEncryptionService;
+import com.varunp.padlock.utils.password.JsonWrapper;
+import com.varunp.padlock.utils.password.PasswordEncryptionService;
 
 import net.dealforest.sample.crypt.AES256Cipher;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.File;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -114,7 +111,7 @@ public class SetupActivity extends AppCompatActivity implements TextWatcher {
 
     private boolean commitRecoveryData(View view)
     {
-        String encryptedPass = AES256Cipher.encrypt(password1.getText().toString(), AES256Cipher.generateKey(recoverya.getText().toString()));
+        String encryptedPass = PasswordEncryptionService.encrypt(password1.getText().toString(), recoverya.getText().toString());
         String recoveryQuestion = recoveryq.getText().toString(); //no need to encrypt
         byte[] recoveryAnsHash, recoveryAnsSalt;
         try

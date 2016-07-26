@@ -1,4 +1,4 @@
-package com.varunp.padlock.utils;
+package com.varunp.padlock.utils.file;
 
 import android.content.Context;
 import android.util.Log;
@@ -104,5 +104,11 @@ public class FileManager
     {
         File f = new File(dir);
         return f.mkdirs();
+    }
+
+    public boolean exists(boolean internal, boolean folder, String dir)
+    {
+        File f =  new File(internal ? getInternalPath(dir) : dir);
+        return f.exists() && (folder ? f.isDirectory() : !f.isDirectory());
     }
 }

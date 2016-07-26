@@ -19,7 +19,7 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:visibility="invisible"
-        android:layout_marginTop="5dp"/>
+        android:layout_marginTop="10dp"/>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/cardList"
