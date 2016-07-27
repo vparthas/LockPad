@@ -2,8 +2,14 @@ package com.varunp.padlock.activities;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.LinearLayoutManager;
@@ -30,9 +36,12 @@ import com.varunp.padlock.adapters.FolderAdapterListener;
 import com.varunp.padlock.utils.file.FileManager;
 import com.varunp.padlock.utils.file.FileTracker;
 import com.varunp.padlock.utils.Globals;
+import com.varunp.padlock.utils.file.ImageUtils;
 import com.varunp.padlock.utils.file.PLFile;
 
 import net.dealforest.sample.crypt.AES256Cipher;
+
+import java.io.File;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, FolderAdapterListener {
@@ -46,6 +55,8 @@ public class MainActivity extends AppCompatActivity
     private RecyclerView.LayoutManager mLayoutManager;
 
     private TextView noItems;
+
+    private boolean selectorFlag;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +80,8 @@ public class MainActivity extends AppCompatActivity
         initRecyclerView();
 
         initDrawer();
+
+        selectorFlag = true;
     }
 
     private void initViews()
@@ -151,7 +164,8 @@ public class MainActivity extends AppCompatActivity
         addImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //TODO: do this shit
+                floatingActionsMenu.collapse();
+                startPhotoSelector();
             }
         });
 
@@ -165,6 +179,51 @@ public class MainActivity extends AppCompatActivity
                 openNewFolderDialog();
             }
         });
+    }
+
+    private static final int SELECT_PICTURE = 1;
+    private void startPhotoSelector()
+    {
+        selectorFlag = true;
+
+        Intent intent = new Intent();
+        intent.setType("image/png");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), SELECT_PICTURE);
+    }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        selectorFlag = true;
+
+        if (resultCode == RESULT_OK)
+        {
+            if (requestCode == SELECT_PICTURE)
+            {
+                Uri selectedImageUri = data.getData();
+                Bitmap bitmap = ImageUtils.getBitmapFromUri(selectedImageUri, getApplicationContext());
+
+                Toast.makeText(getApplicationContext(), "Encrypting Image...", Toast.LENGTH_LONG).show();
+                String enc = ImageUtils.encodeToBase64(bitmap);
+                String aes = AES256Cipher.encrypt(enc, AES256Cipher.getKey());
+
+                String folder = ((FolderAdapter)mRecyclerView.getAdapter()).getFocused();
+                String name = selectedImageUri.toString();
+                name = name.substring(name.lastIndexOf("/") + 1);
+                String path = Globals.FOLDER_DATA + "/" + PLFile.generateFileName(folder, name, Globals.FILENAME_IMAGE);
+
+                FileManager fm = new FileManager(getApplicationContext());
+                fm.saveFile(true, path, aes);
+
+                FileTracker.addFile(getApplicationContext(), folder + Globals.FILE_DELIM + name + Globals.FILENAME_IMAGE);
+
+                Intent imgIntent = new Intent(getApplicationContext(), ImageActivity.class);
+                imgIntent.putExtra(DocumentActivity.INTENT_KEY_FOLDER_NAME, folder);
+                imgIntent.putExtra(DocumentActivity.INTENT_KEY_FILE_NAME, name);
+                imgIntent.putExtra(DocumentActivity.INTENT_KEY_ENCRYPTION_KEY, AES256Cipher.getKey());
+                startActivity(imgIntent);
+            }
+        }
     }
 
     private void openNewFolderDialog()
@@ -240,8 +299,29 @@ public class MainActivity extends AppCompatActivity
     protected void onPause()
     {
         super.onPause();
+
+        if(selectorFlag)
+        {
+            selectorFlag = false;
+            return;
+        }
+
         AES256Cipher.setKey(null);
         finish();
+    }
+
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
+
+        if(!selectorFlag)
+        {
+            AES256Cipher.setKey(null);
+            finish();
+        }
+
+        selectorFlag = false;
     }
 
     @Override
@@ -311,16 +391,16 @@ public class MainActivity extends AppCompatActivity
 
             resetRecycler(FolderAdapter.QUERY_FOLDERS);
         }
-        else if (id == R.id.nav_rate)
-        {
-            try {
-                startActivity(new Intent(Intent.ACTION_VIEW,
-                        Uri.parse("market://details?id=" + getPackageName())));
-            } catch (android.content.ActivityNotFoundException anfe) {
-                startActivity(new Intent(Intent.ACTION_VIEW,
-                        Uri.parse("https://play.google.com/store/apps/details?id=" + getPackageName())));
-            }
-        }
+//        else if (id == R.id.nav_rate)
+//        {
+//            try {
+//                startActivity(new Intent(Intent.ACTION_VIEW,
+//                        Uri.parse("market://details?id=" + getPackageName())));
+//            } catch (android.content.ActivityNotFoundException anfe) {
+//                startActivity(new Intent(Intent.ACTION_VIEW,
+//                        Uri.parse("https://play.google.com/store/apps/details?id=" + getPackageName())));
+//            }
+//        }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
@@ -348,7 +428,11 @@ public class MainActivity extends AppCompatActivity
         }
         else if(file.getSuffix().equals(Globals.FILENAME_IMAGE))
         {
-            //TODO
+            Intent imgIntent = new Intent(getApplicationContext(), ImageActivity.class);
+            imgIntent.putExtra(DocumentActivity.INTENT_KEY_FOLDER_NAME, file.getFolderName());
+            imgIntent.putExtra(DocumentActivity.INTENT_KEY_FILE_NAME, file.getFileName());
+            imgIntent.putExtra(DocumentActivity.INTENT_KEY_ENCRYPTION_KEY, AES256Cipher.getKey());
+            startActivity(imgIntent);
         }
         else
             Log.d("MainActivity", "ERROR: Unrecognized file type: " + file.getRawName());

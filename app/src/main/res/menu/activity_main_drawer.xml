@@ -25,17 +25,17 @@
 
     </group>
 
-    <item android:title="Share PadLock">
-        <menu>
+    <!--<item android:title="Share PadLock">-->
+        <!--<menu>-->
+            <!--&lt;!&ndash;<item&ndash;&gt;-->
+                <!--&lt;!&ndash;android:id="@+id/nav_share"&ndash;&gt;-->
+                <!--&lt;!&ndash;android:icon="@drawable/ic_menu_share"&ndash;&gt;-->
+                <!--&lt;!&ndash;android:title="Share" />&ndash;&gt;-->
             <!--<item-->
-                <!--android:id="@+id/nav_share"-->
-                <!--android:icon="@drawable/ic_menu_share"-->
-                <!--android:title="Share" />-->
-            <item
-                android:id="@+id/nav_rate"
-                android:icon="@drawable/google_play"
-                android:title="Review" />
-        </menu>
-    </item>
+                <!--android:id="@+id/nav_rate"-->
+                <!--android:icon="@drawable/google_play"-->
+                <!--android:title="Review" />-->
+        <!--</menu>-->
+    <!--</item>-->
 
 </menu>

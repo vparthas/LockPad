@@ -8,8 +8,11 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -36,6 +39,8 @@ import com.varunp.padlock.utils.password.PasswordEncryptionService;
 import com.varunp.padlock.utils.password.PasswordRecoveryManager;
 
 import net.dealforest.sample.crypt.AES256Cipher;
+
+import java.io.File;
 
 public class LoginActivity extends AppCompatActivity
 {
@@ -290,6 +295,14 @@ public class LoginActivity extends AppCompatActivity
                         });
             }
 
+        });
+
+        Button button_cancel = (Button) dialog.findViewById(R.id.dialog_recovery_cancel);
+        button_cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.cancel();
+            }
         });
 
         dialog.show();

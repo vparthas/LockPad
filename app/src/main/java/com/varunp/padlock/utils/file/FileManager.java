@@ -1,12 +1,14 @@
 package com.varunp.padlock.utils.file;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.IOException;
 
 /**
  * Created by Varun on 1/14/2016.
