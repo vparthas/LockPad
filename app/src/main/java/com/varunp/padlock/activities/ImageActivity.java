@@ -1,13 +1,18 @@
 package com.varunp.padlock.activities;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Environment;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.os.EnvironmentCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -183,6 +188,7 @@ public class ImageActivity extends AppCompatActivity {
 
         MenuItem item = menu.findItem(R.id.action_share_file);
         item.setTitle("Un-hide file");
+        item.setVisible(false); //TODO: only until can be fixed
 
         return true;
     }
@@ -200,6 +206,12 @@ public class ImageActivity extends AppCompatActivity {
     protected void onPause()
     {
         super.onPause();
+
+        if(unhideFlag)
+        {
+            unhideFlag = false;
+            return;
+        }
 
         AES256Cipher.setKey(null);
         finish();
@@ -247,6 +259,7 @@ public class ImageActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    private boolean unhideFlag;
     private void showUnhideDialog()
     {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -254,21 +267,23 @@ public class ImageActivity extends AppCompatActivity {
         builder.setMessage("Are you sure you want to un-hide this file? The file will be de-encrypted and saved to storage.")
                 .setTitle("Un-hide file?");
 
+        final Activity thisActivity = this;
         builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id)
             {
-                String dec = AES256Cipher.decrypt(imgData, AES256Cipher.getKey());
-                Bitmap bmp = ImageUtils.decodeBase64(dec);
+                int permissionCheck = ContextCompat.checkSelfPermission(thisActivity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+                if(permissionCheck != PackageManager.PERMISSION_GRANTED)
+                {
+                    if (ActivityCompat.shouldShowRequestPermissionRationale(thisActivity, Manifest.permission.WRITE_EXTERNAL_STORAGE))
+                    {
+                        showPermissionError();
+                    }
+                    else
+                    {
+                        unhideFlag = true;
+                        ActivityCompat.requestPermissions(thisActivity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
+                    }
 
-                boolean result = ImageUtils.writeToFile(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/" + fileName + ".png", bmp);
-                if(result)
-                {
-                    Toast.makeText(getApplicationContext(), "File saved to storage.", Toast.LENGTH_SHORT).show();
-                    deleteFile();
-                }
-                else
-                {
-                    Toast.makeText(getApplicationContext(), "Error saving file to storage.", Toast.LENGTH_SHORT).show();
                 }
 
                 dialog.cancel();
@@ -283,6 +298,50 @@ public class ImageActivity extends AppCompatActivity {
 
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    private void showPermissionError()
+    {
+        Toast.makeText(getApplicationContext(), "Write permissions needed to save file", Toast.LENGTH_LONG).show();
+        return;
+    }
+
+    private void unhideFile()
+    {
+        String dec = AES256Cipher.decrypt(imgData, AES256Cipher.getKey());
+        Bitmap bmp = ImageUtils.decodeBase64(dec);
+
+        boolean result = ImageUtils.writeToFile(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/" + fileName + ".png", bmp);
+        if(result)
+        {
+            Toast.makeText(getApplicationContext(), "File saved to storage.", Toast.LENGTH_SHORT).show();
+            deleteFile();
+        }
+        else
+        {
+            Toast.makeText(getApplicationContext(), "Error saving file to storage.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults)
+    {
+        switch (requestCode)
+        {
+            case 0:
+            {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                {
+                    unhideFile();
+                }
+                else
+                {
+                    showPermissionError();
+                }
+                return;
+            }
+        }
     }
 
     private void showNameDialog()
