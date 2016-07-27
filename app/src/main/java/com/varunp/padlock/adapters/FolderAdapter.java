@@ -162,6 +162,7 @@ public class FolderAdapter extends RecyclerView.Adapter<FolderAdapter.ViewHolder
         }
         catch (NumberFormatException e)
         {
+            hasParent = true;
             focused = mQuery;
             mDataset = FileTracker.getFolder(new PLFile(mQuery));
             listener.onQueryChanged(mQuery, getItemCount());

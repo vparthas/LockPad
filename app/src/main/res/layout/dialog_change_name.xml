@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textStyle="bold"
-        android:text="Create new folder:"
+        android:text="Edit name and location:"
         android:layout_marginBottom="2dp"
         android:textColor="@color/colorPrimary"
         android:paddingLeft="2dp"/>
@@ -20,9 +20,16 @@
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/dialog_new_folder_name"
+        android:id="@+id/dialog_change_name_file"
         android:maxLines="1"
-        android:hint="Name"/>
+        android:hint="File name"/>
+
+
+    <AutoCompleteTextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Folder name"
+        android:id="@+id/autoCompleteTextView_folder" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -33,14 +40,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="OK"
-            android:id="@+id/dialog_new_folder_ok"
+            android:id="@+id/dialog_change_name_ok"
             android:layout_weight="1"/>
 
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Cancel"
-            android:id="@+id/dialog_new_folder_cancel"
+            android:id="@+id/dialog_change_name_cancel"
             android:layout_weight="1"/>
 
     </LinearLayout>
