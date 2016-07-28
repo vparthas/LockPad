@@ -1,6 +1,7 @@
 package com.varunp.padlock.activities;
 
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -10,10 +11,14 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Html;
+import android.text.InputType;
 import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -30,6 +35,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
+import com.kennyc.bottomsheet.BottomSheet;
+import com.kennyc.bottomsheet.BottomSheetListener;
 import com.varunp.padlock.R;
 import com.varunp.padlock.adapters.FolderAdapter;
 import com.varunp.padlock.adapters.FolderAdapterListener;
@@ -417,6 +424,12 @@ public class MainActivity extends AppCompatActivity
 
     public void open(PLFile file)
     {
+        if(file.isFolder())
+        {
+            ((FolderAdapter)mRecyclerView.getAdapter()).down(file);
+            return;
+        }
+
         if(file.getSuffix().equals(Globals.FILENAME_TEXT))
         {
             Intent docIntent = new Intent(getApplicationContext(), DocumentActivity.class);
@@ -438,4 +451,141 @@ public class MainActivity extends AppCompatActivity
             Log.d("MainActivity", "ERROR: Unrecognized file type: " + file.getRawName());
     }
 
+    public void longPress(final PLFile file)
+    {
+        String title = file.isFolder() ? file.getFileName()
+                : file.getFolderName() + "/" + file.getFileName();
+
+        new BottomSheet.Builder(this)
+                .setSheet(R.menu.menu_context)
+                .setTitle(title)
+                .setListener(new BottomSheetListener()
+                {
+                    @Override
+                    public void onSheetShown(@NonNull BottomSheet bottomSheet) {}
+
+                    @Override
+                    public void onSheetItemSelected(@NonNull BottomSheet bottomSheet, MenuItem menuItem)
+                    {
+                        int id = menuItem.getItemId();
+
+                        if(id == R.id.context_delete)
+                        {
+                            showDeleteDialog(file);
+                        }
+                        else if(id == R.id.context_edit)
+                        {
+                            if(file.isFolder())
+                            {
+                                showFolderRenameDialog(file);
+                                return;
+                            }
+
+                            open(file);
+                        }
+                    }
+
+                    @Override
+                    public void onSheetDismissed(@NonNull BottomSheet bottomSheet, @DismissEvent int i) {}
+                })
+                .show();
+    }
+
+    private void showFolderRenameDialog(final PLFile folder)
+    {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Rename Folder");
+
+        final EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+        input.setHint("Enter name");
+        input.setText(folder.getFileName());
+        input.setMaxLines(1);
+        builder.setView(input);
+
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which)
+            {
+                String newName = input.getText().toString();
+
+                if(newName.equals(folder.getFileName()))
+                    return;
+
+                if(!FileTracker.checkFolderName(getApplicationContext(), newName))
+                    return;
+
+                if(FileTracker.folderExists(getApplicationContext(), newName))
+                {
+                    showMergeFoldersDialog(folder, newName);
+                    return;
+                }
+
+                moveFolder(folder);
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        builder.show();
+    }
+
+    private void showMergeFoldersDialog(PLFile folder, String newName)
+    {
+        //TODO
+    }
+
+    private void moveFolder(PLFile folder)
+    {
+        //TODO
+    }
+
+    private void showDeleteDialog(final PLFile file)
+    {
+        String title = file.isFolder() ? "Delete folder?" : "Delete file?";
+
+        String subtitle = file.isFolder() ? "'" + file.getFileName() + "' and all of its contents" :
+                "'" + file.getFileName() + "'";
+        subtitle = String.format("Are you sure you want to delete %s? You cannot undo this action.", subtitle);
+
+        new BottomSheet.Builder(this)
+                .setTitle(title)
+                .setMessage(subtitle)
+                .setPositiveButton("Yes")
+                .setNegativeButton("Cancel")
+                .setListener(new BottomSheetListener() {
+                    @Override
+                    public void onSheetShown(@NonNull BottomSheet bottomSheet) {}
+
+                    @Override
+                    public void onSheetItemSelected(@NonNull BottomSheet bottomSheet, MenuItem menuItem)
+                    {
+                        if(menuItem.getItemId() == BottomSheet.BUTTON_POSITIVE)
+                        {
+                            if(file.isFolder())
+                                deleteFolder(file);
+                            else
+                                deleteFile(file);
+                        }
+                    }
+
+                    @Override
+                    public void onSheetDismissed(@NonNull BottomSheet bottomSheet, @DismissEvent int i) {}
+                })
+                .show();
+    }
+
+    private void deleteFolder(PLFile folder)
+    {
+        //TODO
+    }
+
+    private void deleteFile(PLFile file)
+    {
+        //TODO
+    }
 }

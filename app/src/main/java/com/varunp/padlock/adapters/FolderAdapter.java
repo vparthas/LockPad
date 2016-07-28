@@ -73,7 +73,7 @@ public class FolderAdapter extends RecyclerView.Adapter<FolderAdapter.ViewHolder
         hasParent = false;
     }
 
-    private void down(PLFile folder)
+    public void down(PLFile folder)
     {
         refresh(folder.getFileName());
         hasParent = true;
@@ -122,7 +122,7 @@ public class FolderAdapter extends RecyclerView.Adapter<FolderAdapter.ViewHolder
             @Override
             public boolean onLongClick(View v)
             {
-                Toast.makeText(v.getContext(), "Long pressed", Toast.LENGTH_SHORT).show();
+                listener.longPress(mDataset.get(position));
                 return true;
             }
         });

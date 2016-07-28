@@ -132,6 +132,16 @@ public class FileTracker
 
     public static boolean addFolder(Context context, String name)
     {
+        if(!checkFolderName(context, name))
+            return false;
+
+        files.put(name, new HashSet<PLFile>());
+        FolderList.commit(context, files.keySet());
+        return true;
+    }
+
+    public static boolean checkFolderName(Context context, String name)
+    {
         if(name.length() == 0)
         {
             Toast.makeText(context, "Folder name cannot be blank.", Toast.LENGTH_SHORT).show();
@@ -156,9 +166,12 @@ public class FileTracker
             return false;
         }
 
-        files.put(name, new HashSet<PLFile>());
-        FolderList.commit(context, files.keySet());
         return true;
+    }
+
+    public static boolean folderExists(Context context, String name)
+    {
+        return files.containsKey(name);
     }
 
     public static void removeFolder(Context context, String name)

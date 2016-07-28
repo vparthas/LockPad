@@ -12,4 +12,6 @@ public interface FolderAdapterListener
     void onQueryChanged(String query, int itemCount);
 
     void open(PLFile file);
+
+    void longPress(PLFile file);
 }
