@@ -124,8 +124,8 @@ public class FileTracker
             return;
         }
 
-        getQuery(file.getFolderName()).remove(file);
-        getQuery(file.getSuffix()).remove(file);
+        files.get(file.getFolderName()).remove(file);
+        files.get(file.getSuffix()).remove(file);
 
         new FileManager(context).delete(FileManager.FILE_INTERNAL, Globals.FOLDER_DATA + "/" + file.getRawName());
     }

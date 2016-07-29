@@ -50,6 +50,8 @@ import net.dealforest.sample.crypt.AES256Cipher;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.util.HashMap;
+import java.util.Set;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, FolderAdapterListener {
@@ -64,6 +66,8 @@ public class MainActivity extends AppCompatActivity
 
     private TextView noItems;
 
+    private FileManager fileManager;
+
     private boolean selectorFlag;
 
     @Override
@@ -72,6 +76,8 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        fileManager = new FileManager(getApplicationContext());
 
         byte[] key = getIntent().getByteArrayExtra(DocumentActivity.INTENT_KEY_ENCRYPTION_KEY);
         AES256Cipher.setKey(key == null ? AES256Cipher.getKey() : key);
@@ -602,9 +608,12 @@ public class MainActivity extends AppCompatActivity
                     public void onSheetShown(@NonNull BottomSheet bottomSheet) {}
 
                     @Override
-                    public void onSheetItemSelected(@NonNull BottomSheet bottomSheet, MenuItem menuItem)
+                    public void onSheetItemSelected(@NonNull BottomSheet bottomSheet, MenuItem menuItem) {}
+
+                    @Override
+                    public void onSheetDismissed(@NonNull BottomSheet bottomSheet, @DismissEvent int i)
                     {
-                        if(menuItem.getItemId() == BottomSheet.BUTTON_POSITIVE)
+                        if(i == BottomSheetListener.DISMISS_EVENT_BUTTON_POSITIVE)
                         {
                             if(file.isFolder())
                                 deleteFolder(file);
@@ -612,9 +621,6 @@ public class MainActivity extends AppCompatActivity
                                 deleteFile(file);
                         }
                     }
-
-                    @Override
-                    public void onSheetDismissed(@NonNull BottomSheet bottomSheet, @DismissEvent int i) {}
                 })
                 .show();
     }
@@ -626,6 +632,10 @@ public class MainActivity extends AppCompatActivity
 
     private void deleteFile(PLFile file)
     {
-        //TODO
+        String fn = Globals.FOLDER_DATA + "/" + file.getRawName();
+        fileManager.delete(true, fn);
+        FileTracker.removeFile(getApplicationContext(), file);
+
+        ((FolderAdapter)mRecyclerView.getAdapter()).refresh();
     }
 }

@@ -134,7 +134,7 @@ public class FolderAdapter extends RecyclerView.Adapter<FolderAdapter.ViewHolder
         refresh();
     }
 
-    private void refresh()
+    public void refresh()
     {
         try
         {

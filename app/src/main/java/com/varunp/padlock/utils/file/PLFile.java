@@ -2,6 +2,8 @@ package com.varunp.padlock.utils.file;
 
 import com.varunp.padlock.utils.Globals;
 
+import java.util.Objects;
+
 public class PLFile
 {
     public String getFileName() { return fileName; }
@@ -49,5 +51,20 @@ public class PLFile
     public static String generateFileName(String folder, String file, String suffix)
     {
         return folder + Globals.FILE_DELIM + file + suffix;
+    }
+
+    @Override
+    public boolean equals(Object o)
+    {
+        if(!(o instanceof PLFile))
+            return false;
+
+        PLFile plf = (PLFile)o;
+        return this.getRawName().equals(plf.getRawName());
+    }
+
+    @Override
+    public int hashCode() {
+        return this.getRawName().hashCode();
     }
 }
