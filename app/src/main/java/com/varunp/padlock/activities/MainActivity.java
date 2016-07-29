@@ -51,6 +51,7 @@ import net.dealforest.sample.crypt.AES256Cipher;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 
 public class MainActivity extends AppCompatActivity
@@ -138,6 +139,11 @@ public class MainActivity extends AppCompatActivity
     {
         mAdapter = new FolderAdapter(query, this);
         mRecyclerView.setAdapter(mAdapter);
+    }
+
+    private void refreshRecycler()
+    {
+        ((FolderAdapter)mRecyclerView.getAdapter()).refresh();
     }
 
     private void initDrawer()
@@ -627,15 +633,27 @@ public class MainActivity extends AppCompatActivity
 
     private void deleteFolder(PLFile folder)
     {
-        //TODO
+        if(!folder.isFolder())
+            return;
+
+        List<PLFile> files = FileTracker.getFolder(folder);
+        for(PLFile f : files)
+            delete(f);
+
+        FileTracker.removeFolder(getApplicationContext(), folder.getFileName());
+        refreshRecycler();
     }
 
     private void deleteFile(PLFile file)
     {
+        delete(file);
+        refreshRecycler();
+    }
+
+    private void delete(PLFile file)
+    {
         String fn = Globals.FOLDER_DATA + "/" + file.getRawName();
         fileManager.delete(true, fn);
         FileTracker.removeFile(getApplicationContext(), file);
-
-        ((FolderAdapter)mRecyclerView.getAdapter()).refresh();
     }
 }
