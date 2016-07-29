@@ -373,7 +373,7 @@ public class MainActivity extends AppCompatActivity
     {
         super.onResume();
 
-        if(!selectorFlag)
+        if(!selectorFlag && SettingsManager.getBoolean(SettingsManager.CLOSE_ON_PAUSE, true, getApplicationContext()))
         {
             AES256Cipher.setKey(null);
             finish();

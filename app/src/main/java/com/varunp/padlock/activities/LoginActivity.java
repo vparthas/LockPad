@@ -51,6 +51,7 @@ public class LoginActivity extends AppCompatActivity
 
     EditText m_passwordEntry;
     RelativeLayout page_layout;
+    Button m_enter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -105,6 +106,30 @@ public class LoginActivity extends AppCompatActivity
                 }
 
                 return false;
+            }
+        });
+
+        m_enter = (Button)findViewById(R.id.login_enter_button);
+        m_enter.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(final View v)
+            {
+                Snackbar.make(v, "Checking password...", Snackbar.LENGTH_INDEFINITE).setAction("Action", null).show();
+
+                new Thread(new Runnable() {
+                    @Override
+                    public void run()
+                    {
+                        runOnUiThread(new Runnable()
+                        {
+                            @Override
+                            public void run()
+                            {
+                                checkPassword(m_passwordEntry.getText().toString(), v);
+                            }
+                        });
+                    }
+                }).start();
             }
         });
     }
