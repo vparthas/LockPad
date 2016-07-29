@@ -48,6 +48,7 @@ import com.varunp.padlock.utils.file.PLFile;
 
 import net.dealforest.sample.crypt.AES256Cipher;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 
 public class MainActivity extends AppCompatActivity
@@ -203,34 +204,73 @@ public class MainActivity extends AppCompatActivity
     {
         selectorFlag = true;
 
+        if(data == null)
+        {
+            Toast.makeText(getApplicationContext(), "Error: Invalid image data", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         if (resultCode == RESULT_OK)
         {
             if (requestCode == SELECT_PICTURE)
             {
                 Uri selectedImageUri = data.getData();
-                Bitmap bitmap = ImageUtils.getBitmapFromUri(selectedImageUri, getApplicationContext());
-
-                Toast.makeText(getApplicationContext(), "Encrypting Image...", Toast.LENGTH_LONG).show();
-                String enc = ImageUtils.encodeToBase64(bitmap);
-                String aes = AES256Cipher.encrypt(enc, AES256Cipher.getKey());
-
-                String folder = ((FolderAdapter)mRecyclerView.getAdapter()).getFocused();
-                String name = selectedImageUri.toString();
-                name = name.substring(name.lastIndexOf("/") + 1);
-                String path = Globals.FOLDER_DATA + "/" + PLFile.generateFileName(folder, name, Globals.FILENAME_IMAGE);
-
-                FileManager fm = new FileManager(getApplicationContext());
-                fm.saveFile(true, path, aes);
-
-                FileTracker.addFile(getApplicationContext(), folder + Globals.FILE_DELIM + name + Globals.FILENAME_IMAGE);
-
-                Intent imgIntent = new Intent(getApplicationContext(), ImageActivity.class);
-                imgIntent.putExtra(DocumentActivity.INTENT_KEY_FOLDER_NAME, folder);
-                imgIntent.putExtra(DocumentActivity.INTENT_KEY_FILE_NAME, name);
-                imgIntent.putExtra(DocumentActivity.INTENT_KEY_ENCRYPTION_KEY, AES256Cipher.getKey());
-                startActivity(imgIntent);
+                encryptImage(selectedImageUri);
             }
         }
+    }
+
+    private void encryptImage(Uri selectedImageUri)
+    {
+//                Bitmap bitmap = ImageUtils.getBitmapFromUri(selectedImageUri, getApplicationContext());
+        byte[] file = ImageUtils.getfileBytes(selectedImageUri, getApplicationContext());
+        if(file == null)
+        {
+            Toast.makeText(getApplicationContext(), "Error: Invalid image data", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if(file.length > ImageUtils.MAX_SIZE)
+        {
+            Log.d("Image", file.length + "");
+
+            Bitmap temp = BitmapFactory.decodeByteArray(file, 0, file.length);
+//            temp = ImageUtils.getResizedBitmap(temp, ImageUtils.MAX_SIZE);
+
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            temp.compress(Bitmap.CompressFormat.JPEG, 30, stream);
+            file = stream.toByteArray();
+
+            Log.d("Image", file.length + "");
+
+            if(file.length > ImageUtils.MAX_SIZE)
+            {
+                Toast.makeText(getApplicationContext(), "Error: Image file too large", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+
+        String enc = AES256Cipher.encrypt(file, AES256Cipher.getKey());
+
+        String folder = ((FolderAdapter)mRecyclerView.getAdapter()).getFocused();
+        String name = selectedImageUri.toString();
+        name = name.substring(name.lastIndexOf("/") + 1);
+        String path = Globals.FOLDER_DATA + "/" + PLFile.generateFileName(folder, name, Globals.FILENAME_IMAGE);
+
+        FileManager fm = new FileManager(getApplicationContext());
+        fm.saveFile(true, path, enc);
+
+//        String raw = fm.readFile(true, path);
+//        Log.d("Image", raw);
+
+        FileTracker.addFile(getApplicationContext(), folder + Globals.FILE_DELIM + name + Globals.FILENAME_IMAGE);
+
+        Intent imgIntent = new Intent(getApplicationContext(), ImageActivity.class);
+        imgIntent.putExtra(DocumentActivity.INTENT_KEY_FOLDER_NAME, folder);
+        imgIntent.putExtra(DocumentActivity.INTENT_KEY_FILE_NAME, name);
+        imgIntent.putExtra(DocumentActivity.INTENT_KEY_ENCRYPTION_KEY, AES256Cipher.getKey());
+
+        startActivity(imgIntent);
     }
 
     private void openNewFolderDialog()

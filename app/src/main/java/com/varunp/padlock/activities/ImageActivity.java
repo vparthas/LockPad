@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
@@ -160,8 +161,8 @@ public class ImageActivity extends AppCompatActivity {
 
         String filepath = getFilePath(fileName, folderName);
         imgData = fileManager.readFile(true, filepath);
-        String raw = AES256Cipher.decrypt(imgData, AES256Cipher.getKey());
-        Bitmap bmp = ImageUtils.decodeBase64(raw);
+        byte[] raw = AES256Cipher.decryptToByte(imgData, AES256Cipher.getKey());
+        Bitmap bmp = BitmapFactory.decodeByteArray(raw, 0, raw.length);
         setImage(bmp);
         setTitle();
     }

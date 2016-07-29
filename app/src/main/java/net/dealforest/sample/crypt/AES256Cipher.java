@@ -109,6 +109,20 @@ public class AES256Cipher {
         }
     }
 
+    public static String encrypt(byte[] raw, byte[] key)
+    {
+        try
+        {
+            byte[] CipherData = AES256Cipher.encrypt(IvBytes, key, raw);
+            return Base64.encodeToString(CipherData, Base64.DEFAULT);
+        }
+        catch (Exception e)
+        {
+            Log.d("AES256", e.getMessage());
+            return EncryptionFailureErrorMessage;
+        }
+    }
+
     public static String decrypt(String raw, byte[] key)
     {
         try
@@ -121,6 +135,21 @@ public class AES256Cipher {
         {
             Log.d("AES256", e.getMessage());
             return DecryptionFailureErrorMessage;
+        }
+    }
+
+    public static byte[] decryptToByte(String raw, byte[] key)
+    {
+        try
+        {
+            byte[] CipherData = AES256Cipher.decrypt(IvBytes, key,
+                    Base64.decode(raw.getBytes("UTF-8"), Base64.DEFAULT));
+            return CipherData;
+        }
+        catch (Exception e)
+        {
+            Log.d("AES256", e.getMessage());
+            return null;
         }
     }
 }
