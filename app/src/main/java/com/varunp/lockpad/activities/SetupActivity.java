@@ -1,4 +1,4 @@
-package com.varunp.padlock.activities;
+package com.varunp.lockpad.activities;
 
 import android.graphics.Color;
 import android.os.Bundle;
@@ -8,18 +8,17 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Base64;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.varunp.padlock.R;
-import com.varunp.padlock.utils.file.FileManager;
-import com.varunp.padlock.utils.file.FileTracker;
-import com.varunp.padlock.utils.file.FolderList;
-import com.varunp.padlock.utils.Globals;
-import com.varunp.padlock.utils.password.JsonWrapper;
-import com.varunp.padlock.utils.password.PasswordEncryptionService;
+import com.varunp.lockpad.R;
+import com.varunp.lockpad.utils.file.FileManager;
+import com.varunp.lockpad.utils.file.FileTracker;
+import com.varunp.lockpad.utils.file.FolderList;
+import com.varunp.lockpad.utils.Globals;
+import com.varunp.lockpad.utils.password.JsonWrapper;
+import com.varunp.lockpad.utils.password.PasswordEncryptionService;
 
 import net.dealforest.sample.crypt.AES256Cipher;
 

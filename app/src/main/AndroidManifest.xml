@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.varunp.padlock">
+    package="com.varunp.lockpad">
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
@@ -11,7 +11,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".activities.LoginActivity"
+            android:name="com.varunp.lockpad.activities.LoginActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -20,42 +20,42 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activities.MainActivity"
+            android:name="com.varunp.lockpad.activities.MainActivity"
             android:label="@string/title_activity_main"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".activities.SettingsActivity"
+            android:name="com.varunp.lockpad.activities.SettingsActivity"
             android:label="@string/title_activity_settings"
-            android:parentActivityName=".activities.MainActivity">
+            android:parentActivityName="com.varunp.lockpad.activities.MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.varunp.padlock.activities.MainActivity" />
+                android:value="com.varunp.lockpad.activities.MainActivity" />
         </activity>
         <activity
-            android:name=".activities.SetupActivity"
+            android:name="com.varunp.lockpad.activities.SetupActivity"
             android:label="@string/title_activity_setup"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".activities.DocumentActivity"
+            android:name="com.varunp.lockpad.activities.DocumentActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/title_activity_document"
-            android:parentActivityName=".activities.MainActivity"
+            android:parentActivityName="com.varunp.lockpad.activities.MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.varunp.padlock.activities.MainActivity" />
+                android:value="com.varunp.lockpad.activities.MainActivity" />
         </activity>
         <activity
-            android:name=".activities.ImageActivity"
+            android:name="com.varunp.lockpad.activities.ImageActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_image"
-            android:parentActivityName=".activities.MainActivity"
+            android:parentActivityName="com.varunp.lockpad.activities.MainActivity"
             android:theme="@style/FullscreenTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.varunp.padlock.activities.MainActivity" />
+                android:value="com.varunp.lockpad.activities.MainActivity" />
         </activity>
     </application>
 

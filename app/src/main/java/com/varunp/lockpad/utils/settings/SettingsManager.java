@@ -1,11 +1,11 @@
-package com.varunp.padlock.utils.settings;
+package com.varunp.lockpad.utils.settings;
 
 import android.content.Context;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.varunp.padlock.utils.file.FileManager;
+import com.varunp.lockpad.utils.file.FileManager;
 
 import org.json.JSONObject;
 

@@ -1,18 +1,13 @@
-package com.varunp.padlock.utils.password;
+package com.varunp.lockpad.utils.password;
 
 import android.content.Context;
-import android.util.Base64;
-import android.util.Log;
 
-import com.varunp.padlock.utils.Globals;
-import com.varunp.padlock.utils.file.FileManager;
+import com.varunp.lockpad.utils.Globals;
+import com.varunp.lockpad.utils.file.FileManager;
 
 import net.dealforest.sample.crypt.AES256Cipher;
 
 import org.json.JSONObject;
-
-import java.io.File;
-import java.security.spec.ECField;
 
 /**
  * Created by Varun on 6/18/2016.

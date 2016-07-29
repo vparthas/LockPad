@@ -1,4 +1,4 @@
-package com.varunp.padlock.adapters;
+package com.varunp.lockpad.adapters;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -6,12 +6,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.varunp.padlock.R;
-import com.varunp.padlock.utils.file.FileTracker;
-import com.varunp.padlock.utils.Globals;
-import com.varunp.padlock.utils.file.PLFile;
+import com.varunp.lockpad.R;
+import com.varunp.lockpad.utils.file.FileTracker;
+import com.varunp.lockpad.utils.Globals;
+import com.varunp.lockpad.utils.file.PLFile;
 
 import java.util.List;
 

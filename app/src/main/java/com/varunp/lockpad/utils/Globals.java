@@ -1,4 +1,4 @@
-package com.varunp.padlock.utils;
+package com.varunp.lockpad.utils;
 
 /**
  * Created by Varun on 1/14/2016.

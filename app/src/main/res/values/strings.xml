@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">PadLock</string>
+    <string name="app_name">LockPad</string>
 
     <string name="password_prompt">Enter password</string>
     <string name="recovery_button">Forgot Pasword?</string>

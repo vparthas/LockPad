@@ -1,4 +1,4 @@
-package com.varunp.padlock.activities;
+package com.varunp.lockpad.activities;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -10,22 +10,18 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.os.EnvironmentCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Html;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.MenuItem;
-import android.support.v4.app.NavUtils;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -33,13 +29,13 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.varunp.padlock.R;
-import com.varunp.padlock.utils.Globals;
-import com.varunp.padlock.utils.file.FileManager;
-import com.varunp.padlock.utils.file.FileTracker;
-import com.varunp.padlock.utils.file.ImageUtils;
-import com.varunp.padlock.utils.file.PLFile;
-import com.varunp.padlock.utils.settings.SettingsManager;
+import com.varunp.lockpad.R;
+import com.varunp.lockpad.utils.Globals;
+import com.varunp.lockpad.utils.file.FileManager;
+import com.varunp.lockpad.utils.file.FileTracker;
+import com.varunp.lockpad.utils.file.ImageUtils;
+import com.varunp.lockpad.utils.file.PLFile;
+import com.varunp.lockpad.utils.settings.SettingsManager;
 
 import net.dealforest.sample.crypt.AES256Cipher;
 

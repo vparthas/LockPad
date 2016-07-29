@@ -1,4 +1,4 @@
-package com.varunp.padlock;
+package com.varunp.lockpad;
 
 import org.junit.Test;
 

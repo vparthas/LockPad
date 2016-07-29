@@ -1,8 +1,6 @@
-package com.varunp.padlock.utils.file;
+package com.varunp.lockpad.utils.file;
 
-import com.varunp.padlock.utils.Globals;
-
-import java.util.Objects;
+import com.varunp.lockpad.utils.Globals;
 
 public class PLFile
 {

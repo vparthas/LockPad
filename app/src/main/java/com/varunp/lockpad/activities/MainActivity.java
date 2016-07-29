@@ -1,4 +1,4 @@
-package com.varunp.padlock.activities;
+package com.varunp.lockpad.activities;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -32,15 +32,15 @@ import android.widget.Toast;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.kennyc.bottomsheet.BottomSheet;
 import com.kennyc.bottomsheet.BottomSheetListener;
-import com.varunp.padlock.R;
-import com.varunp.padlock.adapters.FolderAdapter;
-import com.varunp.padlock.adapters.FolderAdapterListener;
-import com.varunp.padlock.utils.file.FileManager;
-import com.varunp.padlock.utils.file.FileTracker;
-import com.varunp.padlock.utils.Globals;
-import com.varunp.padlock.utils.file.ImageUtils;
-import com.varunp.padlock.utils.file.PLFile;
-import com.varunp.padlock.utils.settings.SettingsManager;
+import com.varunp.lockpad.R;
+import com.varunp.lockpad.adapters.FolderAdapter;
+import com.varunp.lockpad.adapters.FolderAdapterListener;
+import com.varunp.lockpad.utils.file.FileManager;
+import com.varunp.lockpad.utils.file.FileTracker;
+import com.varunp.lockpad.utils.Globals;
+import com.varunp.lockpad.utils.file.ImageUtils;
+import com.varunp.lockpad.utils.file.PLFile;
+import com.varunp.lockpad.utils.settings.SettingsManager;
 
 import net.dealforest.sample.crypt.AES256Cipher;
 
@@ -378,8 +378,9 @@ public class MainActivity extends AppCompatActivity
             AES256Cipher.setKey(null);
             finish();
         }
-
         selectorFlag = false;
+
+        refreshRecycler();
     }
 
     @Override

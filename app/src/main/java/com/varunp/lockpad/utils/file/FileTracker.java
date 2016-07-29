@@ -1,11 +1,11 @@
-package com.varunp.padlock.utils.file;
+package com.varunp.lockpad.utils.file;
 
 import android.content.Context;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.varunp.padlock.utils.Globals;
+import com.varunp.lockpad.utils.Globals;
 
 import java.util.ArrayList;
 import java.util.HashMap;

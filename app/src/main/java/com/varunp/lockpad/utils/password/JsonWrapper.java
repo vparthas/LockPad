@@ -1,12 +1,10 @@
-package com.varunp.padlock.utils.password;
+package com.varunp.lockpad.utils.password;
 
-import android.bluetooth.BluetoothA2dp;
 import android.util.Base64;
 import android.util.Log;
 
-import com.varunp.padlock.utils.Globals;
+import com.varunp.lockpad.utils.Globals;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**

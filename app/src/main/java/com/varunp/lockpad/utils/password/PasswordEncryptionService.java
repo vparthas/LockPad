@@ -1,4 +1,4 @@
-package com.varunp.padlock.utils.password;
+package com.varunp.lockpad.utils.password;
 
 import net.dealforest.sample.crypt.AES256Cipher;
 

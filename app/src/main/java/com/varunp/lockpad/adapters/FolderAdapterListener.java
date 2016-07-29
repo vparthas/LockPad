@@ -1,8 +1,6 @@
-package com.varunp.padlock.adapters;
+package com.varunp.lockpad.adapters;
 
-import android.graphics.Color;
-
-import com.varunp.padlock.utils.file.PLFile;
+import com.varunp.lockpad.utils.file.PLFile;
 
 /**
  * Created by Varun on 6/18/2016.

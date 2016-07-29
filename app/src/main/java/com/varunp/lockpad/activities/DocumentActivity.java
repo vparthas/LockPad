@@ -1,4 +1,4 @@
-package com.varunp.padlock.activities;
+package com.varunp.lockpad.activities;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -6,14 +6,12 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,22 +19,18 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.MultiAutoCompleteTextView;
 import android.widget.ShareActionProvider;
 import android.widget.Toast;
 
-import com.varunp.padlock.R;
-import com.varunp.padlock.adapters.FolderAdapter;
-import com.varunp.padlock.utils.Globals;
-import com.varunp.padlock.utils.file.FileManager;
-import com.varunp.padlock.utils.file.FileTracker;
-import com.varunp.padlock.utils.file.PLFile;
-import com.varunp.padlock.utils.settings.SettingsManager;
+import com.varunp.lockpad.R;
+import com.varunp.lockpad.utils.Globals;
+import com.varunp.lockpad.utils.file.FileManager;
+import com.varunp.lockpad.utils.file.FileTracker;
+import com.varunp.lockpad.utils.file.PLFile;
+import com.varunp.lockpad.utils.settings.SettingsManager;
 
 import net.dealforest.sample.crypt.AES256Cipher;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 public class DocumentActivity extends AppCompatActivity

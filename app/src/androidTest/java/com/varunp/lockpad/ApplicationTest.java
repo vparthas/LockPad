@@ -1,4 +1,4 @@
-package com.varunp.padlock;
+package com.varunp.lockpad;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;
