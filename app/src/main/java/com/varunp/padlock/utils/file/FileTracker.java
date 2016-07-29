@@ -132,7 +132,12 @@ public class FileTracker
 
     public static boolean addFolder(Context context, String name)
     {
-        if(!checkFolderName(context, name))
+        return addFolder(context, name, false);
+    }
+
+    public static boolean addFolder(Context context, String name, boolean silent)
+    {
+        if(!checkFolderName(context, name, silent, false))
             return false;
 
         files.put(name, new HashSet<PLFile>());
@@ -142,27 +147,36 @@ public class FileTracker
 
     public static boolean checkFolderName(Context context, String name)
     {
+        return checkFolderName(context, name, false, false);
+    }
+
+    public static boolean checkFolderName(Context context, String name, boolean silent, boolean merge)
+    {
         if(name.length() == 0)
         {
-            Toast.makeText(context, "Folder name cannot be blank.", Toast.LENGTH_SHORT).show();
+            if(!silent)
+                Toast.makeText(context, "Folder name cannot be blank.", Toast.LENGTH_SHORT).show();
             return false;
         }
 
         if(name.contains(Globals.FILE_DELIM))
         {
-            Toast.makeText(context, "Folder name cannot contain '|'.", Toast.LENGTH_SHORT).show();
+            if(!silent)
+                Toast.makeText(context, "Folder name cannot contain '|'.", Toast.LENGTH_SHORT).show();
             return false;
         }
 
         if(name.matches("[0-9]+"))
         {
-            Toast.makeText(context, "Folder name cannot contain only numeric digits.", Toast.LENGTH_SHORT).show(); //TODO: fix bug that requires this.
+            if(!silent)
+                Toast.makeText(context, "Folder name cannot contain only numeric digits.", Toast.LENGTH_SHORT).show(); //TODO: fix bug that requires this.
             return false;
         }
 
-        if(files.containsKey(name))
+        if(files.containsKey(name) && !merge)
         {
-            Toast.makeText(context, "Folder already exsists.", Toast.LENGTH_SHORT).show();
+            if(!silent)
+                Toast.makeText(context, "Folder already exsists.", Toast.LENGTH_SHORT).show();
             return false;
         }
 
@@ -174,7 +188,19 @@ public class FileTracker
         return files.containsKey(name);
     }
 
+    public static boolean fileExists(Context context, String name)
+    {
+        PLFile plf = new PLFile(name);
+        return files.get(Globals.FILENAME_TEXT).contains(plf)
+                || files.get(Globals.FILENAME_IMAGE).contains(plf);
+    }
+
     public static void removeFolder(Context context, String name)
+    {
+        removeFolder(context, name, true);
+    }
+
+    public static void removeFolder(Context context, String name, boolean delete)
     {
         if(!files.containsKey(name))
         {
@@ -182,13 +208,37 @@ public class FileTracker
             return;
         }
 
-        Set<PLFile> temp = files.get(name);
-        for(PLFile plf : temp)
+        if(delete)
         {
-            removeFile(context, plf);
+            Set<PLFile> temp = files.get(name);
+            for (PLFile plf : temp)
+            {
+                removeFile(context, plf);
+            }
         }
 
         files.remove(name);
         FolderList.commit(context, files.keySet());
+    }
+
+    public static void moveFile(Context context, PLFile oldLoc, String folder)
+    {
+        String data = Globals.FOLDER_DATA + "/";
+        String nl = folder + Globals.FILE_DELIM + oldLoc.getFileName() + oldLoc.getSuffix();
+
+        nl = fileExists(context, nl) ?
+                folder + Globals.FILE_DELIM + oldLoc.getFileName() + " - " + oldLoc.getFolderName() + oldLoc.getSuffix()
+                : nl;
+
+        int i = 1;
+        while (fileExists(context, nl))
+            nl = folder + Globals.FILE_DELIM + oldLoc.getFileName() + " - " + oldLoc.getFolderName() + " (" + i++ + ")" + oldLoc.getSuffix();
+
+        new FileManager(context).renameFile(true, data + oldLoc.getRawName(), data + nl);
+
+        files.get(oldLoc.getFolderName()).remove(oldLoc);
+        files.get(oldLoc.getSuffix()).remove(oldLoc);
+
+        addFile(context, nl);
     }
 }

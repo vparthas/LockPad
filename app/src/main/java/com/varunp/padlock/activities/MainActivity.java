@@ -564,7 +564,7 @@ public class MainActivity extends AppCompatActivity
                 if(newName.equals(folder.getFileName()))
                     return;
 
-                if(!FileTracker.checkFolderName(getApplicationContext(), newName))
+                if(!FileTracker.checkFolderName(getApplicationContext(), newName, false, true))
                     return;
 
                 if(FileTracker.folderExists(getApplicationContext(), newName))
@@ -573,7 +573,7 @@ public class MainActivity extends AppCompatActivity
                     return;
                 }
 
-                moveFolder(folder);
+                moveFolder(folder, newName);
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -586,14 +586,42 @@ public class MainActivity extends AppCompatActivity
         builder.show();
     }
 
-    private void showMergeFoldersDialog(PLFile folder, String newName)
+    private void showMergeFoldersDialog(final PLFile folder, final String newName)
     {
-        //TODO
+        new BottomSheet.Builder(this)
+                .setTitle("Folder already exists.")
+                .setMessage("The folder '" + newName + "' already exists. Would you like to merge its contents?")
+                .setPositiveButton("Yes")
+                .setNegativeButton("Cancel")
+                .setListener(new BottomSheetListener() {
+                    @Override
+                    public void onSheetShown(@NonNull BottomSheet bottomSheet) {}
+
+                    @Override
+                    public void onSheetItemSelected(@NonNull BottomSheet bottomSheet, MenuItem menuItem) {}
+
+                    @Override
+                    public void onSheetDismissed(@NonNull BottomSheet bottomSheet, @DismissEvent int i)
+                    {
+                        if(i == BottomSheetListener.DISMISS_EVENT_BUTTON_POSITIVE)
+                        {
+                            moveFolder(folder, newName);
+                        }
+                    }
+                })
+                .show();
     }
 
-    private void moveFolder(PLFile folder)
+    private void moveFolder(PLFile folder, String newLoc)
     {
-        //TODO
+        List<PLFile> contents = FileTracker.getFolder(folder);
+        for(PLFile file : contents)
+            FileTracker.moveFile(getApplicationContext(), file, newLoc);
+
+        FileTracker.removeFolder(getApplicationContext(), folder.getFileName(), false);
+        FileTracker.addFolder(getApplicationContext(), newLoc, true);
+
+        refreshRecycler();
     }
 
     private void showDeleteDialog(final PLFile file)
@@ -653,7 +681,7 @@ public class MainActivity extends AppCompatActivity
     private void delete(PLFile file)
     {
         String fn = Globals.FOLDER_DATA + "/" + file.getRawName();
-        fileManager.delete(true, fn);
+//        fileManager.delete(true, fn);
         FileTracker.removeFile(getApplicationContext(), file);
     }
 }

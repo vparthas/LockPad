@@ -101,6 +101,10 @@ public class DocumentActivity extends AppCompatActivity
         folderName = this.getIntent().getStringExtra(INTENT_KEY_FOLDER_NAME);
         fileName = flag ? "New Document" : this.getIntent().getStringExtra(INTENT_KEY_FILE_NAME);
 
+        int i = 1;
+        while (flag && FileTracker.fileExists(getApplicationContext(), PLFile.generateFileName(folderName, fileName, Globals.FILENAME_TEXT)))
+            fileName = fileName + " (" + i++ + ")";
+
         setFileName(folderName, fileName);
         setEditMode(flag);
 
@@ -135,6 +139,11 @@ public class DocumentActivity extends AppCompatActivity
 
     private void saveChanges()
     {
+        String fn = PLFile.generateFileName(folderName, fileName, Globals.FILENAME_TEXT);
+        if(documentInput.getText().toString().isEmpty()
+                && !FileTracker.fileExists(getApplicationContext(), fn))
+            return;
+
         Toast.makeText(this, "Saving changes...", Toast.LENGTH_SHORT).show();
 
         if(documentInput.getText().toString().isEmpty())
@@ -146,7 +155,6 @@ public class DocumentActivity extends AppCompatActivity
         String raw = documentInput.getText().toString();
         String enc = AES256Cipher.encrypt(raw, AES256Cipher.getKey());
 
-        String fn = PLFile.generateFileName(folderName, fileName, Globals.FILENAME_TEXT);
         int i = 0;
         while(fileManager.exists(true, false, Globals.FOLDER_DATA + "/" + fn))
         {
@@ -224,7 +232,7 @@ public class DocumentActivity extends AppCompatActivity
         editText_name.setText(fileName);
         editText_folder.setText(folderName);
 
-        List<PLFile> folders = FileTracker.getFolders();
+        final List<PLFile> folders = FileTracker.getFolders();
         String[] strList = new String[folders.size()];
         for(int i = 0; i < folders.size(); i++)
             strList[i] = folders.get(i).getRawName();
@@ -257,10 +265,17 @@ public class DocumentActivity extends AppCompatActivity
                     return;
                 }
 
-                if(!newFileName.equals(fileName) || !newFolderName.equals(folderName))
+                if((!newFileName.equals(fileName) || !newFolderName.equals(folderName) )
+                        && FileTracker.fileExists(getApplicationContext(), PLFile.generateFileName(folderName, fileName, Globals.FILENAME_TEXT)))
                 {
                     showOverwriteDialog(newFileName, newFolderName);
                 }
+
+                else
+                {
+                    setFileName(newFolderName, newFileName);
+                }
+
                 dialog.dismiss();
             }
         });
@@ -276,6 +291,11 @@ public class DocumentActivity extends AppCompatActivity
         });
 
         dialog.show();
+    }
+
+    private void setTitle()
+    {
+
     }
 
     private void showOverwriteDialog(final String file, final String folder)
@@ -358,6 +378,11 @@ public class DocumentActivity extends AppCompatActivity
             showDiscardDialog();
             return;
         }
+
+        String fn = PLFile.generateFileName(folderName, fileName, Globals.FILENAME_TEXT);
+        if(documentInput.getText().toString().isEmpty()
+                && FileTracker.fileExists(getApplicationContext(), fn))
+            showDeleteDialog();
 
         Intent back = new Intent(this, MainActivity.class);
         back.putExtra(INTENT_KEY_ENCRYPTION_KEY, AES256Cipher.getKey());

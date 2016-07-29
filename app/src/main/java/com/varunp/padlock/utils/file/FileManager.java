@@ -113,4 +113,19 @@ public class FileManager
         File f =  new File(internal ? getInternalPath(dir) : dir);
         return f.exists() && (folder ? f.isDirectory() : !f.isDirectory());
     }
+
+    public boolean renameFile(boolean internal, String oldDir, String newDir)
+    {
+        String path = m_context.getFilesDir() + "/";
+        if(internal)
+            return rename(path + oldDir, path + newDir);
+        else
+            return rename(oldDir, newDir);
+    }
+
+    private boolean rename(String oldDir, String newDir)
+    {
+        File file = new File(oldDir);
+        return file.renameTo(new File(newDir));
+    }
 }
