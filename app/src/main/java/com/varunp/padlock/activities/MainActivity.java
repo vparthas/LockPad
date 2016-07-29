@@ -3,21 +3,16 @@ package com.varunp.padlock.activities;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.Html;
 import android.text.InputType;
 import android.util.Log;
 import android.view.View;
@@ -45,14 +40,12 @@ import com.varunp.padlock.utils.file.FileTracker;
 import com.varunp.padlock.utils.Globals;
 import com.varunp.padlock.utils.file.ImageUtils;
 import com.varunp.padlock.utils.file.PLFile;
+import com.varunp.padlock.utils.settings.SettingsManager;
 
 import net.dealforest.sample.crypt.AES256Cipher;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, FolderAdapterListener {
@@ -80,8 +73,11 @@ public class MainActivity extends AppCompatActivity
 
         fileManager = new FileManager(getApplicationContext());
 
-        byte[] key = getIntent().getByteArrayExtra(DocumentActivity.INTENT_KEY_ENCRYPTION_KEY);
-        AES256Cipher.setKey(key == null ? AES256Cipher.getKey() : key);
+        if(AES256Cipher.getKey() == null)
+        {
+            byte[] key = getIntent().getByteArrayExtra(DocumentActivity.INTENT_KEY_ENCRYPTION_KEY);
+            AES256Cipher.setKey(key == null ? AES256Cipher.getKey() : key);
+        }
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.hide();
@@ -365,8 +361,11 @@ public class MainActivity extends AppCompatActivity
             return;
         }
 
-        AES256Cipher.setKey(null);
-        finish();
+        if(SettingsManager.getBoolean(SettingsManager.CLOSE_ON_PAUSE, true, getApplicationContext()))
+        {
+            AES256Cipher.setKey(null);
+            finish();
+        }
     }
 
     @Override
@@ -404,8 +403,11 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            startActivity(new Intent(this, SettingsActivity.class));
+        if (id == R.id.action_settings)
+        {
+            Intent settings = new Intent(this, SettingsActivity.class);
+            settings.putExtra(DocumentActivity.INTENT_KEY_ENCRYPTION_KEY, AES256Cipher.getKey());
+            startActivity(settings);
             return true;
         }
 

@@ -39,10 +39,10 @@
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".activities.DocumentActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/title_activity_document"
             android:parentActivityName=".activities.MainActivity"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:configChanges="keyboardHidden|orientation|screenSize">
+            android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.varunp.padlock.activities.MainActivity" />

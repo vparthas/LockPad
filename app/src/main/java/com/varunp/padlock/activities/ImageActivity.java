@@ -39,6 +39,7 @@ import com.varunp.padlock.utils.file.FileManager;
 import com.varunp.padlock.utils.file.FileTracker;
 import com.varunp.padlock.utils.file.ImageUtils;
 import com.varunp.padlock.utils.file.PLFile;
+import com.varunp.padlock.utils.settings.SettingsManager;
 
 import net.dealforest.sample.crypt.AES256Cipher;
 
@@ -153,7 +154,9 @@ public class ImageActivity extends AppCompatActivity {
 
         fileName = getIntent().getStringExtra(DocumentActivity.INTENT_KEY_FILE_NAME);
         folderName = getIntent().getStringExtra(DocumentActivity.INTENT_KEY_FOLDER_NAME);
-        AES256Cipher.setKey(getIntent().getByteArrayExtra(DocumentActivity.INTENT_KEY_ENCRYPTION_KEY));
+
+        if(AES256Cipher.getKey() == null)
+            AES256Cipher.setKey(getIntent().getByteArrayExtra(DocumentActivity.INTENT_KEY_ENCRYPTION_KEY));
 
         setTitle(fileName);
 
@@ -197,6 +200,12 @@ public class ImageActivity extends AppCompatActivity {
     @Override
     public void onBackPressed()
     {
+        if(!SettingsManager.getBoolean(SettingsManager.CLOSE_ON_PAUSE, true, getApplicationContext()))
+        {
+            super.onBackPressed();
+            return;
+        }
+
         Intent back = new Intent(this, MainActivity.class);
         back.putExtra(DocumentActivity.INTENT_KEY_ENCRYPTION_KEY, AES256Cipher.getKey());
         back.putExtra(MainActivity.INTENT_FOLDER, folderName);
@@ -214,8 +223,11 @@ public class ImageActivity extends AppCompatActivity {
             return;
         }
 
-        AES256Cipher.setKey(null);
-        finish();
+        if(SettingsManager.getBoolean(SettingsManager.CLOSE_ON_PAUSE, true, getApplicationContext()))
+        {
+            AES256Cipher.setKey(null);
+            finish();
+        }
     }
 
     @Override

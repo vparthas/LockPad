@@ -37,6 +37,7 @@ import com.varunp.padlock.utils.password.JsonWrapper;
 import com.varunp.padlock.R;
 import com.varunp.padlock.utils.password.PasswordEncryptionService;
 import com.varunp.padlock.utils.password.PasswordRecoveryManager;
+import com.varunp.padlock.utils.settings.SettingsManager;
 
 import net.dealforest.sample.crypt.AES256Cipher;
 
@@ -57,6 +58,8 @@ public class LoginActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         setTitle("Login");
+
+        SettingsManager.init(getApplicationContext());
 
         initViews();
     }

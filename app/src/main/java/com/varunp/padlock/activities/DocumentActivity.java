@@ -31,6 +31,7 @@ import com.varunp.padlock.utils.Globals;
 import com.varunp.padlock.utils.file.FileManager;
 import com.varunp.padlock.utils.file.FileTracker;
 import com.varunp.padlock.utils.file.PLFile;
+import com.varunp.padlock.utils.settings.SettingsManager;
 
 import net.dealforest.sample.crypt.AES256Cipher;
 
@@ -95,7 +96,8 @@ public class DocumentActivity extends AppCompatActivity
 
     private void initDocument()
     {
-        AES256Cipher.setKey(this.getIntent().getByteArrayExtra(INTENT_KEY_ENCRYPTION_KEY));
+        if(AES256Cipher.getKey() == null)
+            AES256Cipher.setKey(this.getIntent().getByteArrayExtra(INTENT_KEY_ENCRYPTION_KEY));
 
         boolean flag = this.getIntent().getBooleanExtra(INTENT_KEY_IS_NEW_DOC, true);
         folderName = this.getIntent().getStringExtra(INTENT_KEY_FOLDER_NAME);
@@ -384,6 +386,12 @@ public class DocumentActivity extends AppCompatActivity
                 && FileTracker.fileExists(getApplicationContext(), fn))
             showDeleteDialog();
 
+        if(!SettingsManager.getBoolean(SettingsManager.CLOSE_ON_PAUSE, true, getApplicationContext()))
+        {
+            super.onBackPressed();
+            return;
+        }
+
         Intent back = new Intent(this, MainActivity.class);
         back.putExtra(INTENT_KEY_ENCRYPTION_KEY, AES256Cipher.getKey());
         back.putExtra(MainActivity.INTENT_FOLDER, folderName);
@@ -424,7 +432,10 @@ public class DocumentActivity extends AppCompatActivity
         if(editMode)
             saveChanges();
 
-        AES256Cipher.setKey(null);
-        finish();
+        if(SettingsManager.getBoolean(SettingsManager.CLOSE_ON_PAUSE, true, getApplicationContext()))
+        {
+            AES256Cipher.setKey(null);
+            finish();
+        }
     }
 }
