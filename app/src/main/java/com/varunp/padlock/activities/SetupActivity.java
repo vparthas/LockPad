@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Base64;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -111,13 +112,15 @@ public class SetupActivity extends AppCompatActivity implements TextWatcher {
 
     private boolean commitRecoveryData(View view)
     {
-        String encryptedPass = PasswordEncryptionService.encrypt(password1.getText().toString(), recoverya.getText().toString());
+//        String encryptedPass = PasswordEncryptionService.encrypt(password1.getText().toString(), recoverya.getText().toString());
         String recoveryQuestion = recoveryq.getText().toString(); //no need to encrypt
-        byte[] recoveryAnsHash, recoveryAnsSalt;
+        byte[] recoveryAnsHash, recoveryAnsSalt, key;
         try
         {
             recoveryAnsSalt = PasswordEncryptionService.generateSalt();
             recoveryAnsHash = PasswordEncryptionService.getEncryptedPassword(recoverya.getText().toString(), recoveryAnsSalt);
+
+            key = AES256Cipher.encryptToByte(AES256Cipher.getKey(), AES256Cipher.generateKey(recoverya.getText().toString()));
         }
         catch (Exception e)
         {
@@ -126,7 +129,7 @@ public class SetupActivity extends AppCompatActivity implements TextWatcher {
             return false;
         }
 
-        JSONObject data = JsonWrapper.createRecoveryData(recoveryAnsHash, recoveryAnsSalt, recoveryQuestion, encryptedPass);
+        JSONObject data = JsonWrapper.createRecoveryData(recoveryAnsHash, recoveryAnsSalt, recoveryQuestion, key);
         if(data == null)
             return false;
 
@@ -136,12 +139,18 @@ public class SetupActivity extends AppCompatActivity implements TextWatcher {
 
     private boolean commitPasswordData(View view)
     {
-        byte[] salt, passwordHash;
+        byte[] salt, passwordHash, key;
 
         try
         {
+            String pass = password1.getText().toString();
+
             salt = PasswordEncryptionService.generateSalt();
-            passwordHash = PasswordEncryptionService.getEncryptedPassword(password1.getText().toString(), salt);
+            passwordHash = PasswordEncryptionService.getEncryptedPassword(pass, salt);
+
+            byte[] temp = AES256Cipher.generateKey();
+            key = AES256Cipher.encryptToByte(temp, AES256Cipher.generateKey(pass));
+            AES256Cipher.setKey(temp);
         }
         catch (Exception e)
         {
@@ -150,10 +159,10 @@ public class SetupActivity extends AppCompatActivity implements TextWatcher {
             return false;
         }
 
-        JSONObject loginDataJSON = JsonWrapper.createLoginData(passwordHash, salt);
+        JSONObject loginDataJSON = JsonWrapper.createLoginData(passwordHash, salt, key);
         if(loginDataJSON == null)
         {
-            Snackbar.make(view, "Failed to create JSON", Snackbar.LENGTH_LONG)
+            Snackbar.make(view, "Failed to create login data", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show();
             return false;
         }
@@ -174,8 +183,7 @@ public class SetupActivity extends AppCompatActivity implements TextWatcher {
 //        if(!fm.createFolder(fm.getInternalPath(Globals.FOLDER_DATA + "/" + Globals.FOLDER_TUTORIAL)))
 //            return false;
 
-        String tutText = PasswordEncryptionService.encrypt(Globals.TUTORIAL_TEXT_PLACEHOLDR,
-                                                            password1.getText().toString());
+        String tutText = AES256Cipher.encrypt(Globals.TUTORIAL_TEXT_PLACEHOLDR, AES256Cipher.getKey());
         String tutFileName = Globals.FOLDER_TUTORIAL + Globals.FILE_DELIM + Globals.FOLDER_TUTORIAL + Globals.FILENAME_TEXT;
 
         if(!fm.saveFile(true, Globals.FOLDER_DATA + "/" + tutFileName, tutText))
@@ -185,6 +193,8 @@ public class SetupActivity extends AppCompatActivity implements TextWatcher {
         folders.add(Globals.FOLDER_TUTORIAL);
         FolderList.commit(getApplicationContext(), folders);
         FileTracker.init(getApplicationContext(), fm.getContentsStr(true, Globals.FOLDER_DATA));
+
+        AES256Cipher.setKey(null);
 
         return true;
     }

@@ -2,11 +2,14 @@ package com.varunp.padlock.utils.password;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.util.Base64;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.varunp.padlock.utils.Globals;
 import com.varunp.padlock.utils.file.FileManager;
+
+import net.dealforest.sample.crypt.AES256Cipher;
 
 /**
  * Created by Varun on 6/18/2016.
@@ -47,10 +50,10 @@ public class PasswordRecoveryManager
 
     public void recover(String answer, String newPass) throws Exception
     {
+        byte[] key = AES256Cipher.decryptToByte(data.password, AES256Cipher.generateKey(answer));
+
         PasswordChanger changer = new PasswordChanger(context);
-        String oldPass = PasswordEncryptionService.decrypt(data.password, answer);
-//        Log.d("PWRecov", oldPass + " " + data.password + " " + answer + " " + newPass);
-        changer.changePassword(oldPass, newPass, answer);
+        changer.changePassword(key, newPass);
         loadData();
     }
 

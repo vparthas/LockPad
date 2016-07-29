@@ -27,6 +27,13 @@ public class SettingsActivity extends AppCompatActivity
 
         if(AES256Cipher.getKey() == null)
             AES256Cipher.setKey(getIntent().getByteArrayExtra(DocumentActivity.INTENT_KEY_ENCRYPTION_KEY));
+
+        initViews();
+    }
+
+    private void initViews()
+    {
+        
     }
 
     @Override

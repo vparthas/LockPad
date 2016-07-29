@@ -10,6 +10,7 @@ import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
@@ -18,7 +19,9 @@ import java.util.Arrays;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
@@ -85,8 +88,25 @@ public class AES256Cipher {
             key = Arrays.copyOf(key, 32); // use only first 128 bit
 
             SecretKeySpec secretKeySpec = new SecretKeySpec(key, "AES");
+            Log.d("AES", key.length + "");
 
             return key;
+        }
+        catch (Exception e)
+        {
+            Log.d("AES", e.getMessage());
+            return null;
+        }
+    }
+
+    public static byte[] generateKey()
+    {
+        try
+        {
+            SecureRandom random = new SecureRandom();
+            byte[] bytes = new byte[32]; // 128 bits are converted to 16 bytes;
+            random.nextBytes(bytes);
+            return bytes;
         }
         catch (Exception e)
         {
@@ -145,6 +165,32 @@ public class AES256Cipher {
             byte[] CipherData = AES256Cipher.decrypt(IvBytes, key,
                     Base64.decode(raw.getBytes("UTF-8"), Base64.DEFAULT));
             return CipherData;
+        }
+        catch (Exception e)
+        {
+            Log.d("AES256", e.getMessage());
+            return null;
+        }
+    }
+
+    public static byte[] decryptToByte(byte[] raw, byte[] key)
+    {
+        try
+        {
+            return AES256Cipher.decrypt(IvBytes, key, raw);
+        }
+        catch (Exception e)
+        {
+            Log.d("AES256", e.getMessage());
+            return null;
+        }
+    }
+
+    public static byte[] encryptToByte(byte[] raw, byte[] key)
+    {
+        try
+        {
+            return AES256Cipher.encrypt(IvBytes, key, raw);
         }
         catch (Exception e)
         {

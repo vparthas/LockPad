@@ -1,5 +1,6 @@
 package com.varunp.padlock.utils.password;
 
+import android.bluetooth.BluetoothA2dp;
 import android.util.Base64;
 import android.util.Log;
 
@@ -24,8 +25,10 @@ public class JsonWrapper
                 jsonObject.getString(Globals.JSON_LOGIN_PASSWORD_OBJECT), Base64.DEFAULT);
             byte[] salt = Base64.decode(
                     jsonObject.getString(Globals.JSON_LOGIN_SALT_OBJECT), Base64.DEFAULT);
+            byte[] key = Base64.decode(
+                    jsonObject.getString(Globals.JSON_LOGIN_KEY_OBJECT), Base64.DEFAULT);
 
-            return new byte[][]{pass, salt};
+            return new byte[][]{pass, salt, key};
         }
         catch (Exception e)
         {
@@ -33,16 +36,18 @@ public class JsonWrapper
         }
     }
 
-    public static JSONObject createLoginData(byte[] pass, byte[] s)
+    public static JSONObject createLoginData(byte[] pass, byte[] s, byte[] enc)
     {
         JSONObject ret = new JSONObject();
         try
         {
             String password = Base64.encodeToString(pass, Base64.DEFAULT);
             String salt = Base64.encodeToString(s, Base64.DEFAULT);
+            String key = Base64.encodeToString(enc, Base64.DEFAULT);
 
             ret.put(Globals.JSON_LOGIN_PASSWORD_OBJECT, password);
             ret.put(Globals.JSON_LOGIN_SALT_OBJECT, salt);
+            ret.put(Globals.JSON_LOGIN_KEY_OBJECT, key);
         }
         catch (Exception e)
         {
@@ -52,13 +57,14 @@ public class JsonWrapper
         return ret;
     }
 
-    public static JSONObject createRecoveryData(byte[] hash, byte[] salt, String question, String password)
+    public static JSONObject createRecoveryData(byte[] hash, byte[] salt, String question, byte[] key)
     {
         JSONObject data = new JSONObject();
         try
         {
             String answerHash = Base64.encodeToString(hash, Base64.DEFAULT);
             String answerSalt = Base64.encodeToString(salt, Base64.DEFAULT);
+            String password = Base64.encodeToString(key, Base64.DEFAULT);
 
             data.put(Globals.JSON_RECOVERY_ANSWER_HASH_OBJECT, answerHash);
             data.put(Globals.JSON_RECOVERY_ANSWER_SALT_OBJECT, answerSalt);

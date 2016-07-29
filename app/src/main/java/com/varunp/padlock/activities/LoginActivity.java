@@ -124,7 +124,7 @@ public class LoginActivity extends AppCompatActivity
 
         if(valid)
         {
-            AES256Cipher.setKey(AES256Cipher.generateKey(s));
+            AES256Cipher.setKey(AES256Cipher.decryptToByte(m_passwordData[2], AES256Cipher.generateKey(s)));
             startActivity(new Intent(this, MainActivity.class));
             finish();
         }

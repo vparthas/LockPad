@@ -26,6 +26,7 @@ public class Globals
     //JSON Markers
     public static final String JSON_LOGIN_PASSWORD_OBJECT = "password";
     public static final String JSON_LOGIN_SALT_OBJECT = "salt";
+    public static final String JSON_LOGIN_KEY_OBJECT = "key";
 
     public static final String JSON_RECOVERY_PASSWORD_OBJECT = "password_encrypted";
     public static final String JSON_RECOVERY_ANSWER_HASH_OBJECT = "recovery_answer_hash";
