@@ -47,6 +47,8 @@ public class DocumentActivity extends AppCompatActivity
     private String folderName, fileName;
     FileManager fileManager;
 
+    private String oldText;
+
     private ShareActionProvider mShareActionProvider;
 
     @Override
@@ -82,7 +84,7 @@ public class DocumentActivity extends AppCompatActivity
 
                 setEditMode(!editMode);
                 if(!editMode)
-                    saveChanges();
+                    saveChanges(false);
             }
         });
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -110,6 +112,9 @@ public class DocumentActivity extends AppCompatActivity
 
     private void setEditMode(boolean /*bickin back bein*/ bool)
     {
+        if(editMode == false && bool == true)
+            oldText = documentInput.getText().toString();
+
         editMode = bool;
 
         documentInput.setEnabled(editMode);
@@ -133,8 +138,11 @@ public class DocumentActivity extends AppCompatActivity
         documentInput.setText(decrypt);
     }
 
-    private void saveChanges()
+    private void saveChanges(boolean renamed)
     {
+        if (!renamed && oldText.equals(documentInput.getText().toString()))
+            return;
+
         String fn = PLFile.generateFileName(folderName, fileName, Globals.FILENAME_TEXT);
         if(documentInput.getText().toString().isEmpty()
                 && !FileTracker.fileExists(getApplicationContext(), fn))
@@ -152,7 +160,7 @@ public class DocumentActivity extends AppCompatActivity
         String enc = AES256Cipher.encrypt(raw, AES256Cipher.getKey());
 
         int i = 0;
-        while(fileManager.exists(true, false, Globals.FOLDER_DATA + "/" + fn))
+        while(renamed && fileManager.exists(true, false, Globals.FOLDER_DATA + "/" + fn))
         {
             fn = PLFile.generateFileName(folderName, fileName + " (" + ++i + ")", Globals.FILENAME_TEXT);
         }
@@ -289,11 +297,6 @@ public class DocumentActivity extends AppCompatActivity
         dialog.show();
     }
 
-    private void setTitle()
-    {
-
-    }
-
     private void showOverwriteDialog(final String file, final String folder)
     {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -308,7 +311,7 @@ public class DocumentActivity extends AppCompatActivity
 
                 fileName = file;
                 folderName = folder;
-                saveChanges();
+                saveChanges(true);
 
                 dialog.cancel();
             }
@@ -318,7 +321,7 @@ public class DocumentActivity extends AppCompatActivity
             {
                 fileName = file;
                 folderName = folder;
-                saveChanges();
+                saveChanges(true);
 
                 dialog.cancel();
             }
@@ -424,7 +427,7 @@ public class DocumentActivity extends AppCompatActivity
         super.onPause();
 
         if(editMode)
-            saveChanges();
+            saveChanges(false);
 
         if(SettingsManager.getBoolean(SettingsManager.CLOSE_ON_PAUSE, true, getApplicationContext()))
         {
