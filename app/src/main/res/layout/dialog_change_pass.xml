@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:minWidth="400dp"
     android:paddingLeft="2dp"
@@ -12,7 +13,7 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textStyle="bold"
-        android:text="Edit name and location:"
+        android:text="Change Password:"
         android:layout_marginBottom="2dp"
         android:textColor="@color/colorPrimary"
         android:paddingLeft="2dp"/>
@@ -20,16 +21,39 @@
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/dialog_change_name_file"
+        android:id="@+id/dialog_change_pass_oldPass"
         android:maxLines="1"
-        android:hint="File name"/>
+        android:hint="Current password"
+        android:inputType="textPassword"
+        android:fontFamily="Roboto"/>
 
-
-    <AutoCompleteTextView
+    <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Folder name"
-        android:id="@+id/autoCompleteTextView_folder" />
+        android:id="@+id/dialog_change_pass_newPass1"
+        android:maxLines="1"
+        android:hint="New password"
+        android:inputType="textPassword"
+        android:fontFamily="Roboto"/>
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/dialog_change_pass_newPass2"
+        android:maxLines="1"
+        android:hint="Retype"
+        android:inputType="textPassword"
+        android:fontFamily="Roboto"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Fields cannot be blank."
+        android:id="@+id/dialog_change_pass_error"
+        android:layout_gravity="right"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:textColor="@color/setup_submit_disabled"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -40,7 +64,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="OK"
-            android:id="@+id/dialog_change_name_ok"
+            android:id="@+id/dialog_change_pass_ok"
             android:layout_weight="1"
             android:textColor="@color/colorPrimary"/>
 
@@ -48,7 +72,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Cancel"
-            android:id="@+id/dialog_change_name_cancel"
+            android:id="@+id/dialog_change_pass_cancel"
             android:layout_weight="1"
             android:textColor="@color/colorPrimary"/>
 

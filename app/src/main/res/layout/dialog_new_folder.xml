@@ -34,14 +34,16 @@
             android:layout_height="wrap_content"
             android:text="OK"
             android:id="@+id/dialog_new_folder_ok"
-            android:layout_weight="1"/>
+            android:layout_weight="1"
+            android:textColor="@color/colorPrimary"/>
 
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Cancel"
             android:id="@+id/dialog_new_folder_cancel"
-            android:layout_weight="1"/>
+            android:layout_weight="1"
+            android:textColor="@color/colorPrimary"/>
 
     </LinearLayout>
 

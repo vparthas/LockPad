@@ -157,7 +157,7 @@ public class LoginActivity extends AppCompatActivity
     {
         super.onResume();
 
-        m_fm = new FileManager(getApplication());
+        m_fm = new FileManager(getApplicationContext());
         String loginDataRaw = m_fm.readFile(FileManager.FILE_INTERNAL, Globals.FILENAME_LOGIN_INFO);
         m_passwordData = JsonWrapper.readLoginData(loginDataRaw);
 
