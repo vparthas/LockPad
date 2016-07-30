@@ -106,6 +106,12 @@ public class LoginActivity extends AppCompatActivity
             @Override
             public void onClick(final View v)
             {
+                View view = getCurrentFocus();
+                if (view != null) {
+                    InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                }
+
                 Snackbar.make(v, "Checking password...", Snackbar.LENGTH_INDEFINITE).setAction("Action", null).show();
 
                 new Thread(new Runnable() {

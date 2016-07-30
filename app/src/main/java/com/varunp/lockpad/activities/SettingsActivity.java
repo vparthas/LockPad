@@ -27,6 +27,7 @@ import com.varunp.lockpad.utils.file.PLFile;
 import com.varunp.lockpad.utils.password.JsonWrapper;
 import com.varunp.lockpad.utils.password.PasswordChanger;
 import com.varunp.lockpad.utils.password.PasswordEncryptionService;
+import com.varunp.lockpad.utils.password.PasswordRecoveryManager;
 import com.varunp.lockpad.utils.settings.SettingsManager;
 
 import net.dealforest.sample.crypt.AES256Cipher;
@@ -134,18 +135,15 @@ public class SettingsActivity extends AppCompatActivity
             @Override
             public void onClick(View v)
             {
-                Pair<Boolean, String> status = checkFields(oldPass.getText().toString(),
+                String status = checkFields(oldPass.getText().toString(),
                         newPass1.getText().toString(),
                         newPass2.getText().toString(),
                         m_passwordData);
 
-                String error = status.second;
-                if(error.isEmpty())
-                    errorView.setVisibility(View.GONE);
-                else
-                    errorView.setText(error);
+                errorView.setVisibility(status.isEmpty() ? View.GONE : View.VISIBLE);
+                errorView.setText(status);
 
-                if(!status.first)
+                if(!status.isEmpty())
                     return;
 
                 if(changePassword(oldPass.getText().toString(), newPass1.getText().toString(), m_passwordData))
@@ -167,10 +165,10 @@ public class SettingsActivity extends AppCompatActivity
         dialog.show();
     }
 
-    private Pair<Boolean, String> checkFields(String oldp, String newp1, String newp2, byte[][] m_passwordData)
+    private String checkFields(String oldp, String newp1, String newp2, byte[][] m_passwordData)
     {
         if(oldp.isEmpty() || newp1.isEmpty() || newp2.isEmpty())
-            return new Pair<Boolean, String>(false, "Fields cannot be blank.");
+            return "Fields cannot be blank.";
 
         boolean auth = false;
         try {
@@ -179,15 +177,15 @@ public class SettingsActivity extends AppCompatActivity
         } catch (Exception e) {}
 
         if(!auth)
-            return new Pair<Boolean, String>(false, "Password incorrect.")  ;
+            return "Password incorrect.";
 
         if (!newp1.equals(newp2))
-            return new Pair<Boolean, String>(false, "Passwords do not match");
+            return "Passwords do not match.";
 
         else if(newp1.length() < 6)
-            return new Pair<Boolean, String>(false, "Password must be at least 6 characters in length");
+            return "Password must be at least 6 characters in length.";
 
-        return new Pair<Boolean, String>(true, "");
+        return "";
     }
 
     private boolean changePassword(String oldPass, String newPass, byte[][] m_passwordData)
@@ -206,7 +204,76 @@ public class SettingsActivity extends AppCompatActivity
 
     private void showChangeRecovDialog()
     {
+        final Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.dialog_change_recov);
+        dialog.setCancelable(true);
 
+        final PasswordRecoveryManager prm = new PasswordRecoveryManager(getApplicationContext());
+
+        TextView questionView = (TextView)dialog.findViewById(R.id.dialog_change_recov_current_question);
+        questionView.setText(prm.getData().question);
+
+        final TextView errorView = (TextView)dialog.findViewById(R.id.dialog_change_recov_error);
+        errorView.setText("Fields cannot be blank.");
+
+        final EditText oldAnsInput = (EditText)dialog.findViewById(R.id.dialog_change_recov_current_answer);
+        final EditText newAnsInput = (EditText)dialog.findViewById(R.id.dialog_change_recov_new_answer);
+        final EditText newQuestionInput = (EditText)dialog.findViewById(R.id.dialog_change_recov_new_question);
+
+        Button okButton = (Button)dialog.findViewById(R.id.dialog_change_recov_ok);
+        okButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v)
+            {
+                String oldans = oldAnsInput.getText().toString();
+                String newans = newAnsInput.getText().toString();
+                String newques = newQuestionInput.getText().toString();
+
+                String status = checkRecovFields(oldans, newans, newques, prm);
+
+                errorView.setVisibility(status.isEmpty() ? View.GONE : View.VISIBLE);
+                errorView.setText(status);
+
+                if(!status.isEmpty())
+                    return;
+
+                if(prm.changeRecoveryInfo(oldans, newques, newans))
+                    dialog.dismiss();
+                else
+                    Toast.makeText(getApplicationContext(), "Error saving data", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        Button cancelButton = (Button)dialog.findViewById(R.id.dialog_change_recov_cancel);
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v)
+            {
+                dialog.cancel();
+            }
+        });
+
+        dialog.show();
+    }
+
+    private String checkRecovFields(String oldans, String newans, String newques, PasswordRecoveryManager prm)
+    {
+        if(oldans.isEmpty() || newans.isEmpty() || newques.isEmpty())
+            return "Fields cannot be blank.";
+
+        boolean auth = false;
+        try {
+            if(PasswordEncryptionService.authenticate(oldans, prm.getData().hash, prm.getData().salt))
+                auth = true;
+        } catch (Exception e) {}
+
+        if(!auth)
+            return "Answer incorrect.";
+
+        else if(newans.length() < 6)
+            return "Answer must be at least 6 characters in length.";
+
+        return "";
     }
 
     @Override
