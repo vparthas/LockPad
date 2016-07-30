@@ -12,7 +12,6 @@ public class Globals
 
     //folder names
     public static final String FOLDER_DATA = "data";
-    public static final String FOLDER_TUTORIAL = "Tutorial";
     public static final String FOLDER_PARENT = "..";
     public static final String FILE_DELIM = "|";
 
@@ -39,5 +38,6 @@ public class Globals
     public static final String NAV_HEADER_NOTES = "Notes";
     public static final String NAV_HEADER_IMAGES = "Images";
 
-    public static String TUTORIAL_TEXT_PLACEHOLDR = "TODO...";
+    public static final String FOLDER_TUTORIAL = "Welcome!";
+    public static String TUTORIAL_TEXT_PLACEHOLDR = "Thank you for installing LockPad! Please keep in mind that while all file data is fully encrypted, file and folder names are not.";
 }
