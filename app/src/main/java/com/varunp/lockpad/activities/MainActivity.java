@@ -203,7 +203,7 @@ public class MainActivity extends AppCompatActivity
         selectorFlag = true;
 
         Intent intent = new Intent();
-        intent.setType("image/png");
+        intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
         startActivityForResult(Intent.createChooser(intent, "Select Picture"), SELECT_PICTURE);
     }
